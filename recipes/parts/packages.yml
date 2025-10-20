@@ -23,6 +23,7 @@ modules:
         - zellij
         - zsh
         - helix
+        - fzf
         # Devel
         - distrobox
         - podman
