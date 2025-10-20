@@ -1,0 +1,19 @@
+modules:
+  - type: containerfile
+    snippets:
+      - ENV AKMODS_BUILD_USER=builder
+  - type: dnf
+    install:
+      packages:
+        - akmod-nvidia
+        - xorg-x11-drv-nvidia
+        - xorg-x11-drv-nvidia-libs
+        - xorg-x11-drv-nvidia-cuda
+        - nvidia-settings
+  - type: kargs
+    arch: x86_64
+    kargs:
+      - rd.driver.blacklist=nouveau
+      - modprobe.blacklist=nouveau
+      - nvidia-drm.modeset=1
+  - type: initramfs

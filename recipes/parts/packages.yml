@@ -1,0 +1,36 @@
+modules:
+  - type: bling
+    install:
+      - rpmfusion
+  - type: dnf
+    repos:
+      cleanup: true
+      copr:
+        enable:
+          - ublue-os/packages
+          - atim/starship
+          - varlad/zellij
+    install:
+      packages:
+    install:
+      packages:
+        # Ublue
+        - uupd # TODO: systemctl start uupd.service
+        - ublue-os-just
+        # Terminal
+        - alacritty
+        - starship
+        - zellij
+        - zsh
+        - helix
+        # Devel
+        - distrobox
+        - podman
+        - toolbox
+  - type: brew
+    nofile-limits: true
+  - type: script
+    # snippets:
+    #   - "/home/linuxbrew/.linuxbrew/bin/brew install lazygit"
+    scripts:
+      - "install_vscode.sh"
