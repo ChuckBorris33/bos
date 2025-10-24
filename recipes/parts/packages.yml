@@ -7,31 +7,26 @@ modules:
       cleanup: true
       copr:
         enable:
-          - ublue-os/packages
           - atim/starship
           - varlad/zellij
     install:
       packages:
-    install:
-      packages:
-        # Ublue
-        - uupd # TODO: systemctl start uupd.service
-        - ublue-os-just
         # Terminal
         - alacritty
         - starship
         - zellij
         - zsh
         - helix
-        - fzf
         # Devel
         - distrobox
         - podman
         - toolbox
   - type: brew
     nofile-limits: true
+  - type: brew-install
+    source: local
+    install:
+     - fzf
   - type: script
-    # snippets:
-    #   - "/home/linuxbrew/.linuxbrew/bin/brew install lazygit"
     scripts:
       - "install_vscode.sh"

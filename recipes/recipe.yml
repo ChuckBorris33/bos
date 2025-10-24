@@ -15,14 +15,19 @@ modules:
   - type: files
     files:
       - source: system
-        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+        destination: /
+  - from-file: "parts/ublue.yml"
   - from-file: "parts/packages.yml"
   - from-file: "parts/nvidia.yml"
-  - from-file: "parts/proprietary.yml"
+  - from-file: "parts/media.yml"
   - type: fonts
     fonts:
       nerd-fonts:
         - FiraCode
       google-fonts:
         - FiraSans
+  - type: script
+    scripts:
+      - removeunusedrepos.sh
+      - regenerateinitramfs.sh
   - type: signing
