@@ -1,9 +1,0 @@
-name: brew-install
-shortdesc: Installs defined homebrew applications on every boot
-example: |
-  type: brew-install
-  options:
-    - "--force"
-  install:
-    - uv
-    - zellij

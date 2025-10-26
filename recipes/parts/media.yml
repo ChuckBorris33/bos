@@ -15,7 +15,6 @@ modules:
   - type: dnf
     install:
       packages:
-        - intel-media-driver
         - libva-nvidia-driver
         - ffmpeg-libs
         - libva

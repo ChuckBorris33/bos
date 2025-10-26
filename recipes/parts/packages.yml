@@ -1,32 +1,22 @@
 modules:
-  - type: bling
-    install:
-      - rpmfusion
   - type: dnf
     repos:
       cleanup: true
       copr:
         enable:
-          - atim/starship
-          - varlad/zellij
+          - cdayjr/yadm
     install:
       packages:
         # Terminal
         - alacritty
-        - starship
-        - zellij
         - zsh
-        - helix
+        - yadm
         # Devel
         - distrobox
         - podman
         - toolbox
   - type: brew
     nofile-limits: true
-  - type: brew-install
-    source: local
-    install:
-     - fzf
   - type: script
     scripts:
       - "install_vscode.sh"
