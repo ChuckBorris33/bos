@@ -20,6 +20,8 @@ modules:
   - from-file: "parts/packages.yml"
   - from-file: "parts/nvidia.yml"
   - from-file: "parts/media.yml"
+  - type: bootc-hooks
+    source: local
   - type: fonts
     fonts:
       nerd-fonts:
@@ -31,3 +33,4 @@ modules:
       - removeunusedrepos.sh
       - regenerateinitramfs.sh
   - type: signing
+

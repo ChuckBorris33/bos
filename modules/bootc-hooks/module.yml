@@ -1,0 +1,4 @@
+name: bootc-hooks
+shortdesc: The bootc-hooks module allows to run scripts on boot, when image updated or switched
+example: |
+  type: bootc-hooks
