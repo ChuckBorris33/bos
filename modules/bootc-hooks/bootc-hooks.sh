@@ -33,3 +33,6 @@ systemctl -f enable $SERVICE_NAME
 BOOTC_HOOKS_DIR="${CONFIG_DIRECTORY}/bootc-hooks"
 mkdir /usr/libexec/bootc-hooks
 cp -rf "$BOOTC_HOOKS_DIR"/* /usr/libexec/bootc-hooks
+
+# Install dependencies
+dnf -y install yq
