@@ -14,7 +14,7 @@ SERVICE_FILE="/usr/lib/systemd/system/$SERVICE_NAME"
 install -Dm 0755 "$SOURCE_SCRIPT" "$TARGET_SCRIPT"
 
 # Create the systemd service file
-cat <<EOF > "$SERVICE_FILE"
+cat <<EOF >"$SERVICE_FILE"
 [Unit]
 Description=Run bootc hooks after boot
 After=multi-user.target
@@ -28,8 +28,8 @@ WantedBy=multi-user.target
 EOF
 
 # Enable the service
-systemctl --global -f enable $SERVICE_NAME
+systemctl -f enable $SERVICE_NAME
 
-
-BOOTC_HOOKS_DIR="${CONFIG_DIRECTORY}/bootc-hooks
+BOOTC_HOOKS_DIR="${CONFIG_DIRECTORY}/bootc-hooks"
+mkdir /usr/libexec/bootc-hooks
 cp -rf "$BOOTC_HOOKS_DIR"/* /usr/libexec/bootc-hooks
