@@ -33,4 +33,3 @@ modules:
       - removeunusedrepos.sh
       - regenerateinitramfs.sh
   - type: signing
-
