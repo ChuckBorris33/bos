@@ -27,7 +27,7 @@ modules:
       nerd-fonts:
         - FiraCode
       google-fonts:
-        - FiraSans
+        - Fira Sans
   - type: script
     scripts:
       - removeunusedrepos.sh

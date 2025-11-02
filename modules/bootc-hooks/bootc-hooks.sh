@@ -6,7 +6,7 @@ set -euo pipefail
 # Define paths
 SCRIPT_NAME="run-bootc-hooks.sh"
 SOURCE_SCRIPT="$MODULE_DIRECTORY/bootc-hooks/$SCRIPT_NAME"
-TARGET_SCRIPT="/usr/libexec/$SCRIPT_NAME"
+TARGET_SCRIPT="/usr/libexec/bootc-hooks/$SCRIPT_NAME"
 SERVICE_NAME="bootc-hooks.service"
 SERVICE_FILE="/usr/lib/systemd/system/$SERVICE_NAME"
 
@@ -33,6 +33,7 @@ systemctl -f enable $SERVICE_NAME
 BOOTC_HOOKS_DIR="${CONFIG_DIRECTORY}/bootc-hooks"
 mkdir /usr/libexec/bootc-hooks
 cp -rf "$BOOTC_HOOKS_DIR"/* /usr/libexec/bootc-hooks
+chmod -R +x /usr/libexec/bootc-hooks
 
 # Install dependencies
 dnf -y install yq

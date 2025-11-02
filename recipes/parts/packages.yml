@@ -18,5 +18,8 @@ modules:
   - type: brew
     nofile-limits: true
   - type: script
+    snippets:
+      - "curl -f https://zed.dev/install.sh | sh"
+      - "bash <(curl -s https://raw.githubusercontent.com/blue-build/cli/main/install.sh)"
     scripts:
       - "install_vscode.sh"
