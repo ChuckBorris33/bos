@@ -2,6 +2,8 @@ modules:
   - type: dnf
     repos:
       cleanup: true
+      files:
+        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
       copr:
         enable:
           - cdayjr/yadm
@@ -15,11 +17,11 @@ modules:
         - distrobox
         - podman
         - toolbox
+        - zed
   - type: brew
     nofile-limits: true
   - type: script
     snippets:
-      - "curl -f https://zed.dev/install.sh | sh"
-      - "bash <(curl -s https://raw.githubusercontent.com/blue-build/cli/main/install.sh)"
+      - "podman run --pull always --rm ghcr.io/blue-build/cli:latest-installer | bash"
     scripts:
       - "install_vscode.sh"

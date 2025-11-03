@@ -31,7 +31,7 @@ EOF
 systemctl -f enable $SERVICE_NAME
 
 BOOTC_HOOKS_DIR="${CONFIG_DIRECTORY}/bootc-hooks"
-mkdir /usr/libexec/bootc-hooks
+mkdir -p /usr/libexec/bootc-hooks
 cp -rf "$BOOTC_HOOKS_DIR"/* /usr/libexec/bootc-hooks
 chmod -R +x /usr/libexec/bootc-hooks
 
