@@ -21,7 +21,5 @@ modules:
   - type: brew
     nofile-limits: true
   - type: script
-    snippets:
-      - "podman run --pull always --rm ghcr.io/blue-build/cli:latest-installer | bash"
     scripts:
       - "install_vscode.sh"
