@@ -18,8 +18,31 @@ modules:
         - podman
         - toolbox
         - zed
+    remove:
+      packages:
+        - cosmic-term
+        - cosmic-wallpapers
   - type: brew
     nofile-limits: true
   - type: script
     scripts:
       - "install_vscode.sh"
+  - type: default-flatpaks
+    configurations:
+      - notify: true
+        scope: user
+        install:
+          - com.github.IsmaelMartinez.teams_for_linux
+          - com.google.Chrome
+          - com.spotify.Client
+          - io.beekeeperstudio.Studio
+          - io.github.betaflight.BetaflightConfigurator
+          - dev.edfloreshz.CosmicTweaks
+      - notify: true
+        scope: user
+        repo:
+          url: https://apt.pop-os.org/cosmic/cosmic.flatpakrepo
+          name: cosmic
+          Title: Cosmic
+        install:
+          - io.github.cosmic_utils.cosmic-ext-applet-clipboard-manager
