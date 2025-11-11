@@ -18,9 +18,9 @@ modules:
         - podman
         - toolbox
         - zed
+        - openconnect
     remove:
       packages:
-        - cosmic-term
         - cosmic-wallpapers
   - type: brew
     nofile-limits: true
