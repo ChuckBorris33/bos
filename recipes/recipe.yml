@@ -22,6 +22,9 @@ modules:
   - from-file: "parts/media.yml"
   - type: bootc-hooks
     source: local
+  - type: secure-dns
+    provider: cloudflare
+    source: local
   - type: fonts
     fonts:
       nerd-fonts:

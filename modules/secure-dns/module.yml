@@ -1,0 +1,5 @@
+name: secure-dns
+shortdesc: The secure-dns-miodule adds secure dns config for popular dns providers
+example: |
+  type: secure-dns
+  provider: quad9
