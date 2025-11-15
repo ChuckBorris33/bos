@@ -17,7 +17,8 @@ install -Dm 0755 "$SOURCE_SCRIPT" "$TARGET_SCRIPT"
 cat <<EOF >"$SERVICE_FILE"
 [Unit]
 Description=Run bootc hooks after boot
-After=multi-user.target
+Requires=network-online.target
+After=network-online.target multi-user.target
 
 [Service]
 Type=oneshot

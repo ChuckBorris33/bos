@@ -2,8 +2,8 @@ import "@typespec/json-schema";
 using TypeSpec.JsonSchema;
 
 @jsonSchema("/modules/bootc-hooks-latest.json")
-model BrewModuleLatest {
-  ...BrewModuleV1;
+model BootcHooksModuleLatest {
+  ...BootcHooksModuleV1 
 }
 
 @jsonSchema("/modules/bootc-hooks-v1.json")
