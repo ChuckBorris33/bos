@@ -7,7 +7,7 @@ set -euo pipefail
 SYSTEM_SCRIPT_NAME="run-system-bootc-hooks.sh"
 USER_SCRIPT_NAME="run-user-bootc-hooks.sh"
 MODULE_DIR="$MODULE_DIRECTORY/bootc-hooks"
-LIBEXEC_DIR="/usr/libexec/bootc-hooks/"
+LIBEXEC_DIR="/usr/libexec/bootc-hooks"
 SYSTEM_SERVICE_NAME="system-bootc-hooks.service"
 USER_SERVICE_NAME="user-bootc-hooks.service"
 SYSTEM_SERVICE_FILE="/usr/lib/systemd/system/$SYSTEM_SERVICE_NAME"
@@ -38,8 +38,7 @@ EOF
 cat <<EOF >"$USER_SERVICE_FILE"
 [Unit]
 Description=Run user bootc hooks after login
-Requires=network-online.target
-After=network-online.target default.target
+After=default.target
 
 [Service]
 Type=oneshot
@@ -59,11 +58,12 @@ mkdir -p /usr/libexec/bootc-hooks/{system,user}/{boot,switch,update}
 
 for scope in system user; do
   for event in boot update switch; do
-    query=".${scope}.${event}.scripts[]?"
+    query=".${scope}.${event}[]?"
     declare -a scripts_array=()
     get_json_array scripts_array "${query}" "$1"
+    echo "$scripts_array"
     if [ ${#scripts_array[@]} -gt 0 ]; then
-      dest_dir="${LIBEXEC_DIR}${scope}/${event}"
+      dest_dir="${LIBEXEC_DIR}/${scope}/${event}"
       echo "Copying ${#scripts_array[@]} scripts for ${scope}/${event} hook..."
       for script in "${scripts_array[@]}"; do
         script_path="${SCRIPT_DIR}/${script}"

@@ -1,18 +1,13 @@
 import "@typespec/json-schema";
 using TypeSpec.JsonSchema;
 
-model HookActions {
-  /** List of script files to run. */
-  scripts?: string[];
-}
-
 model HookEvents {
   /** Actions to run on boot. */
-  boot?: HookActions;
+  boot?: string[];
   /** Actions to run on OS update. */
-  update?: HookActions;
+  update?: string[];
   /** Actions to run on OS switch (rollback). */
-  switch?: HookActions;
+  switch?: string[];
 }
 
 @jsonSchema("/modules/bootc-hooks-latest.json")

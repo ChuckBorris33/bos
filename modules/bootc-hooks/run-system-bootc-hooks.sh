@@ -37,10 +37,6 @@ echo "$yaml_content" | sudo tee "$VERSION_FILE" > /dev/null
 
 if [ "${new_image}" != "${old_image}" ]; then
     echo "Image has changed. Running switch hooks."
-    if [ -f /usr/libexec/bootc-hooks/switch.sh ]; then
-        echo "Running main switch hook."
-        /usr/libexec/bootc-hooks/switch.sh
-    fi
     if [ -d "$SWITCH_HOOKS_DIR" ]; then
         for hook in "$SWITCH_HOOKS_DIR"/*; do
             if [ -x "$hook" ]; then
@@ -53,10 +49,6 @@ fi
 
 if [ "${new_digest}" != "${old_digest}" ]; then
     echo "Digest has changed. Running update hooks."
-    if [ -f /usr/libexec/bootc-hooks/update.sh ]; then
-        echo "Running main update hook."
-        /usr/libexec/bootc-hooks/update.sh
-    fi
     if [ -d "$UPDATE_HOOKS_DIR" ]; then
         for hook in "$UPDATE_HOOKS_DIR"/*; do
             if [ -x "$hook" ]; then
@@ -68,10 +60,6 @@ if [ "${new_digest}" != "${old_digest}" ]; then
 fi
 
 echo "Running boot hooks."
-if [ -f /usr/libexec/bootc-hooks/boot.sh ]; then
-    echo "Running main boot hook."
-    /usr/libexec/bootc-hooks/boot.sh
-fi
 if [ -d "$BOOT_HOOKS_DIR" ]; then
     for hook in "$BOOT_HOOKS_DIR"/*; do
         if [ -x "$hook" ]; then
