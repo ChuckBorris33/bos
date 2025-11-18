@@ -3,9 +3,9 @@
 set -euo pipefail
 
 VERSION_FILE="/var/lib/bootc-hooks/version.yaml"
-SWITCH_HOOKS_DIR="/usr/libexec/bootc-hooks/switch.d"
-UPDATE_HOOKS_DIR="/usr/libexec/bootc-hooks/update.d"
-BOOT_HOOKS_DIR="/usr/libexec/bootc-hooks/boot.d"
+SWITCH_HOOKS_DIR="/usr/libexec/bootc-hooks/system/switch"
+UPDATE_HOOKS_DIR="/usr/libexec/bootc-hooks/system/update"
+BOOT_HOOKS_DIR="/usr/libexec/bootc-hooks/system/boot"
 
 old_image=""
 old_digest=""

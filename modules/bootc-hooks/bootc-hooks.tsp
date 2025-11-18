@@ -1,14 +1,32 @@
 import "@typespec/json-schema";
 using TypeSpec.JsonSchema;
 
-@jsonSchema("/modules/bootc-hooks-latest.json")
-model BootcHooksModuleLatest {
-  ...BootcHooksModuleV1 
+model HookActions {
+  /** List of script files to run. */
+  scripts?: string[];
 }
 
+model HookEvents {
+  /** Actions to run on boot. */
+  boot?: HookActions;
+  /** Actions to run on OS update. */
+  update?: HookActions;
+  /** Actions to run on OS switch (rollback). */
+  switch?: HookActions;
+}
+
+@jsonSchema("/modules/bootc-hooks-latest.json")
+model BootcHooksModuleLatest {
+  ...BootcHooksModuleV1
+}
 @jsonSchema("/modules/bootc-hooks-v1.json")
 model BootcHooksModuleV1 {
-  /** The bootc-hooks module adds service that checks if image was updated or switched and runs scripts accordingly.
+  /**
+   * The bootc-hooks module adds a service that runs scripts based on bootc events.
    */
   type: "bootc-hooks" | "bootc-hooks@v1" | "bootc-hooks@latest";
+  /** Hooks to run in the system context. */
+  system?: HookEvents;
+  /** Hooks to run in the user context. */
+  user?: HookEvents;
 }
