@@ -2,40 +2,32 @@
 
 set -euo pipefail
 
-# Define user-specific paths
-CONFIG_DIR="$HOME/.config/bootc-hooks"
-VERSION_FILE="$CONFIG_DIR/version.yaml"
+# Define paths
+VERSION_FILE="/var/lib/bootc-hooks/version.yaml"
+PREVIOUS_VERSION_FILE="/var/lib/bootc-hooks/version.previous.yaml"
 SWITCH_HOOKS_DIR="/usr/libexec/bootc-hooks/user/switch"
 UPDATE_HOOKS_DIR="/usr/libexec/bootc-hooks/user/update"
 BOOT_HOOKS_DIR="/usr/libexec/bootc-hooks/user/boot"
 
-# Ensure the config directory exists
-mkdir -p "$CONFIG_DIR"
-
 old_image=""
 old_digest=""
-if [ -f "$VERSION_FILE" ]; then
-    echo "Reading existing image and digest from $VERSION_FILE"
-    old_image=$(yq e '.image' "$VERSION_FILE")
-    old_digest=$(yq e '.digest' "$VERSION_FILE")
-    echo "Existing User Image: ${old_image}"
-    echo "Existing User Digest: ${old_digest}"
+if [ -f "$PREVIOUS_VERSION_FILE" ]; then
+    echo "Reading previous image and digest from $PREVIOUS_VERSION_FILE"
+    old_image=$(yq e '.image' "$PREVIOUS_VERSION_FILE")
+    old_digest=$(yq e '.digest' "$PREVIOUS_VERSION_FILE")
+    echo "Previous User Image: ${old_image}"
+    echo "Previous User Digest: ${old_digest}"
 fi
 
-# Get current booted image information
-output=$(bootc status --format yaml --booted)
-new_image=$(echo "$output" | yq e '.status.booted.image.image.image')
-new_digest=$(echo "$output" | yq e '.status.booted.image.imageDigest')
-
-# Create the YAML content
-yaml_content=$(cat <<EOF
-image: ${new_image}
-digest: ${new_digest}
-EOF
-)
-
-# Write the new version info to the user's version file
-echo "$yaml_content" > "$VERSION_FILE"
+new_image=""
+new_digest=""
+if [ -f "$VERSION_FILE" ]; then
+    echo "Reading new image and digest from $VERSION_FILE"
+    new_image=$(yq e '.image' "$VERSION_FILE")
+    new_digest=$(yq e '.digest' "$VERSION_FILE")
+    echo "New User Image: ${new_image}"
+    echo "New User Digest: ${new_digest}"
+fi
 
 # --- Run Hooks ---
 

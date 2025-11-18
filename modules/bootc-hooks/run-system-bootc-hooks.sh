@@ -2,28 +2,36 @@
 
 set -euo pipefail
 
-VERSION_FILE="/var/lib/bootc-hooks/version.yaml"
+VERSION_DIR="/var/lib/bootc-hooks"
+VERSION_FILE="$VERSION_DIR/version.yaml"
+PREVIOUS_VERSION_FILE="$VERSION_DIR/version.previous.yaml"
 SWITCH_HOOKS_DIR="/usr/libexec/bootc-hooks/system/switch"
 UPDATE_HOOKS_DIR="/usr/libexec/bootc-hooks/system/update"
 BOOT_HOOKS_DIR="/usr/libexec/bootc-hooks/system/boot"
 
+# Create the directory if it doesn't exist
+sudo mkdir -p "$VERSION_DIR"
+
+# Rotate version files
+if [ -f "$VERSION_FILE" ]; then
+    echo "Moving old version file to $PREVIOUS_VERSION_FILE"
+    sudo mv "$VERSION_FILE" "$PREVIOUS_VERSION_FILE"
+fi
+
 old_image=""
 old_digest=""
-if [ -f "$VERSION_FILE" ]; then
-    echo "Reading existing image and digest from $VERSION_FILE"
-    old_image=$(yq e '.image' "$VERSION_FILE")
-    old_digest=$(yq e '.digest' "$VERSION_FILE")
-    echo "Existing Image: ${old_image}"
-    echo "Existing Digest: ${old_digest}"
+if [ -f "$PREVIOUS_VERSION_FILE" ]; then
+    echo "Reading previous image and digest from $PREVIOUS_VERSION_FILE"
+    old_image=$(yq e '.image' "$PREVIOUS_VERSION_FILE")
+    old_digest=$(yq e '.digest' "$PREVIOUS_VERSION_FILE")
+    echo "Previous Image: ${old_image}"
+    echo "Previous Digest: ${old_digest}"
 fi
 
 output=$(bootc status --format yaml --booted)
 
 new_image=$(echo "$output" | yq e '.status.booted.image.image.image')
 new_digest=$(echo "$output" | yq e '.status.booted.image.imageDigest')
-
-# Create the directory if it doesn't exist
-sudo mkdir -p /var/lib/bootc-hooks
 
 # Create the YAML content
 yaml_content=$(cat <<EOF

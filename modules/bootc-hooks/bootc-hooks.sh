@@ -38,7 +38,7 @@ EOF
 cat <<EOF >"$USER_SERVICE_FILE"
 [Unit]
 Description=Run user bootc hooks after login
-After=default.target
+After=default.target system-bootc-hooks.service
 
 [Service]
 Type=oneshot
