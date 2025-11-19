@@ -24,18 +24,9 @@ modules:
     source: local
     user:
       boot:
-        - user_boot.sh
-      update:
-        - user_update.sh
+        - yadm_pull.sh
       switch:
-        - user_switch.sh
-    system:
-      boot:
-        - system_boot.sh
-      update:
-        - system_update.sh
-      switch:
-        - system_switch.sh
+        - yadm_clone.sh
   - type: secure-dns
     provider: cloudflare
     source: local

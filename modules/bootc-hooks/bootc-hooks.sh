@@ -61,7 +61,6 @@ for scope in system user; do
     query=".${scope}.${event}[]?"
     declare -a scripts_array=()
     get_json_array scripts_array "${query}" "$1"
-    echo "$scripts_array"
     if [ ${#scripts_array[@]} -gt 0 ]; then
       dest_dir="${LIBEXEC_DIR}/${scope}/${event}"
       echo "Copying ${#scripts_array[@]} scripts for ${scope}/${event} hook..."
