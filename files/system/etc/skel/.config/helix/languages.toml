@@ -1,0 +1,24 @@
+
+[[language]]
+name = "typescript"
+# Use the default typescript-language-server for most features, and eslint for diagnostics/code actions
+language-servers = ["typescript-language-server"]
+auto-format = true
+# Use prettier as the formatter
+formatter = { command = 'prettier', args = ["--parser", "typescript"] }
+
+[[language]]
+name = "tsx"
+language-servers = ["typescript-language-server"]
+auto-format = true
+formatter = { command = 'prettier', args = ["--parser", "typescript"] }
+
+
+[[language]]
+name = "python"
+language-servers = ["pyright", "ruff"]
+[language-server.pyright.config.python.analysis]
+typeCheckingMode = "basic"
+[language-server.ruff]
+command = "ruff"
+args = ["server"]
