@@ -1,0 +1,14 @@
+name: first-time-setup
+shortdesc: First time setup module to configure user environment on first boot
+example: |
+  shell: zsh
+  dotfiles_repo: git@github.com:chuckborris33/dotfiles.git
+  flatpak_remotes:
+    - name: flathub
+      url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      apps:
+        - com.spotify.Client
+  brew:
+    formulae:
+      - fzf
+      - gh

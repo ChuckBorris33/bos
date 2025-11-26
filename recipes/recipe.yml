@@ -25,8 +25,38 @@ modules:
     user:
       boot:
         - yadm_pull.sh
-      switch:
-        - yadm_clone.sh
+  - type: first-time-setup
+    source: local
+    shell: zsh
+    dotfiles_repo: git@github.com:chuckborris33/dotfiles.git
+    flatpak_remotes:
+      - name: flathub
+        url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        apps:
+          - com.github.IsmaelMartinez.teams_for_linux
+          - com.spotify.Client
+          - io.beekeeperstudio.Studio
+          - io.github.betaflight.BetaflightConfigurator
+          - dev.edfloreshz.CosmicTweaks
+      - name: cosmic
+        url: "https://apt.pop-os.org/cosmic/cosmic.flatpakrepo"
+        apps:
+          - io.github.cosmic_utils.cosmic-ext-applet-clipboard-manager
+    brew:
+      formulae:
+        - fzf
+        - starship
+        - helix
+        - neovim
+        - bat
+        - ripgrep
+        - fd
+        - eza
+        - zoxide
+        - tldr
+        - fnm
+        - direnv
+        - zellij
   - type: secure-dns
     provider: cloudflare
     source: local

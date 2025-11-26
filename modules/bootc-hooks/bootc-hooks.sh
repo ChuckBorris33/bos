@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "Running bootc-hooks module"
 
 set -euo pipefail

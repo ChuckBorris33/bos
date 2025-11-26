@@ -11,6 +11,6 @@ source $ZSH/oh-my-zsh.sh
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh --cmd cd)"
 eval "$(fnm env --use-on-cd --shell zsh)"
-DIRENV_LOG_FORMAT="" 
+DIRENV_LOG_FORMAT=""
 eval "$(direnv hook zsh)"
 
