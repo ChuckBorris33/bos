@@ -1,0 +1,11 @@
+# Betaflight DFU Mode
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", TAG+="uaccess"
+
+# Betaflight Normal Mode (STM32F411)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess"
+
+# ModemManager blacklist
+ACTION=="add|change", SUBSYSTEM=="usb", ENV{ID_MM_DEVICE_IGNORE}="1", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11"
+ACTION=="add|change", SUBSYSTEM=="usb", ENV{ID_MM_DEVICE_IGNORE}="1", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740"
