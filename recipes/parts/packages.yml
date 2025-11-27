@@ -13,6 +13,7 @@ modules:
         - alacritty
         - zsh
         - yadm
+        - gum
         # Devel
         - distrobox
         - podman
@@ -20,6 +21,9 @@ modules:
         - zed
         - openconnect
         - gh
+        # Graphics
+        - mesa-vulkan-drivers
+        - vulkan-tools
   - type: brew
     nofile-limits: true
   - type: script

@@ -14,44 +14,84 @@ fi
 # Part 2: Main script logic
 # -----------------------------------------------------------------------------
 
-CONFIG_FILE="files/first_time_setup_config.yaml"
+CONFIG_FILE="/etc/first_time_setup/config.yaml"
 
 # --- UI Functions ---
 
 print_art() {
-cat << "EOF"
-================================================================================
+    local cols lines inner_height border_line
+    cols=$(tput cols 2>/dev/null || echo 80)
+    lines=$(tput lines 2>/dev/null || echo 24)
 
+    # Inner vertical space between the two '=' border lines
+    inner_height=$((lines - 4))
+    ((inner_height < 1)) && inner_height=1
 
+    # Build a full-width '=' border line
+    border_line=$(printf '%*s' "$cols" '' | tr ' ' '=')
 
-                          ██████╗  ██████╗  ██████╗
-                          ██╔══██╗██╔═══██╗██╔════╝
-                          ██████╔╝██║   ██║╚█████╗
-                          ██╔══██╗██║   ██║ ╚═══██╗
-                          ██████╔╝╚██████╔╝██████╔╝
-                          ╚═════╝  ╚═════╝ ╚═════╝
+    # ASCII art content lines (logo + text)
+    local -a art=(
+"██████╗  ██████╗  ██████╗"
+"██╔══██╗██╔═══██╗██╔════╝"
+"██████╔╝██║   ██║╚█████╗"
+"██╔══██╗██║   ██║ ╚═══██╗"
+"██████╔╝╚██████╔╝██████╔╝"
+"╚═════╝  ╚═════╝ ╚═════╝"
+""
+"Boris's OS"
+"First time boot script"
+    )
 
-                                Boris's OS
-                           First time boot script
+    local art_lines=${#art[@]}
+    local display_art_lines=$art_lines
 
+    # If terminal height too small, truncate art
+    if (( inner_height < art_lines )); then
+        display_art_lines=$inner_height
+    fi
 
+    local blank_lines=$((inner_height - display_art_lines))
+    ((blank_lines < 0)) && blank_lines=0
+    local top_pad=$((blank_lines / 2))
+    local bottom_pad=$((blank_lines - top_pad))
 
-================================================================================
-EOF
+    echo "$border_line"
+
+    # Top padding
+    for ((i=0; i<top_pad; i++)); do echo ""; done
+
+    # Art (possibly truncated)
+    for ((i=0; i<display_art_lines; i++)); do
+        raw="${art[i]}"
+        if [ -z "$raw" ]; then
+            echo ""
+        else
+            trimmed="$(printf '%s' "$raw" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            line_len=${#trimmed}
+            if (( line_len > cols )); then
+                trimmed="${trimmed:0:cols}"
+                line_len=${#trimmed}
+            fi
+            pad=$(( (cols - line_len) / 2 ))
+            ((pad < 0)) && pad=0
+            printf "%*s%s\n" "$pad" "" "$trimmed"
+        fi
+    done
+
+    # Bottom padding
+    for ((i=0; i<bottom_pad; i++)); do echo ""; done
+
+    echo "$border_line"
 }
 
 redraw_screen() {
     clear
-    local total_lines
-    total_lines=$(tput lines)
-    local available_height=$((total_lines - 2))
-    local ascii_art_height=18
-    local top_padding=$(( (available_height - ascii_art_height) / 2 ))
-    [ $top_padding -lt 0 ] && top_padding=0
-
-    for ((i=0; i<top_padding; i++)); do echo ""; done
     print_art
-    tput cup $((total_lines - 3)) 0
+    # Position cursor three lines from bottom for subsequent interactive output
+    local total_lines
+    total_lines=$(tput lines 2>/dev/null || echo 24)
+    tput cup $((total_lines - 3)) 0 2>/dev/null || true
 }
 
 # --- Setup Functions ---
