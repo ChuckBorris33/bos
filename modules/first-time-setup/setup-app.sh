@@ -22,9 +22,8 @@ print_art() {
     local cols lines inner_height border_line
     cols=$(tput cols 2>/dev/null || echo 80)
     lines=$(tput lines 2>/dev/null || echo 24)
-
     # Inner vertical space between the two '=' border lines
-    inner_height=$((lines - 4))
+    inner_height=$((lines - 5))
     ((inner_height < 1)) && inner_height=1
 
     # Build a full-width '=' border line
@@ -34,10 +33,10 @@ print_art() {
     local -a art=(
 "██████╗  ██████╗  ██████╗"
 "██╔══██╗██╔═══██╗██╔════╝"
-"██████╔╝██║   ██║╚█████╗"
+"██████╔╝██║   ██║╚█████╗ "
 "██╔══██╗██║   ██║ ╚═══██╗"
 "██████╔╝╚██████╔╝██████╔╝"
-"╚═════╝  ╚═════╝ ╚═════╝"
+"╚═════╝  ╚═════╝ ╚═════╝ "
 ""
 "Boris's OS"
 "First time boot script"
@@ -85,12 +84,20 @@ print_art() {
     echo "$border_line"
 }
 
-redraw_screen() {
+draw_screen() {
     clear
     print_art
     # Position cursor three lines from bottom for subsequent interactive output
     local total_lines
     total_lines=$(tput lines 2>/dev/null || echo 24)
+    tput cup $((total_lines - 3)) 0 2>/dev/null || true
+}
+
+clear_info() {
+    local total_lines
+    total_lines=$(tput lines 2>/dev/null || echo 24)
+    tput cup $((total_lines - 3)) 0 2>/dev/null || true
+    tput ed
     tput cup $((total_lines - 3)) 0 2>/dev/null || true
 }
 
@@ -104,11 +111,11 @@ check_dependencies() {
             exit 1
         fi
     done
+    clear_info
 }
 
 install_flatpaks() {
     if [ -n "$(yq e '.flatpak_remotes[]' "$CONFIG_FILE")" ]; then
-        gum style --bold --foreground "212" "Installing Flatpak applications..."
         local total_apps=0
         local app_lengths
         app_lengths=$(yq e '.flatpak_remotes[].apps | length' "$CONFIG_FILE" 2>/dev/null || echo "")
@@ -153,7 +160,6 @@ install_brew_packages() {
     local total_formulae=${#formulae_to_install[@]}
 
     if [ "$total_formulae" -gt 0 ]; then
-        gum style --bold --foreground "212" "Installing brew formulae..."
         local current_formula_index=1
         for formula in "${formulae_to_install[@]}"; do
             local title="Installing brew formula ($current_formula_index/$total_formulae): $formula"
@@ -171,14 +177,12 @@ set_default_shell() {
         local shell_path
         shell_path="$(which "$desired_shell")"
         if [ "$(basename "$SHELL")" != "$desired_shell" ]; then
-            gum style --bold --foreground "212" "Setting default shell to $desired_shell..."
             chsh -s "$shell_path"
         fi
     fi
 }
 
 setup_ssh_and_github() {
-    gum style --bold --foreground "212" "Setting up SSH key and GitHub..."
     local SSH_KEY="$HOME/.ssh/github"
     eval "$(ssh-agent -s)" &> /dev/null
     if [ ! -f "$SSH_KEY" ]; then
@@ -186,41 +190,41 @@ setup_ssh_and_github() {
     fi
 
     if ! gh auth status &> /dev/null; then
-        gh auth login -s admin:public_key -p ssh --skip-ssh-key -w -c
-        redraw_screen
+        gh auth login -s admin:public_key -p ssh --skip-ssh-key -wc
+        clear_info
     fi
 
     if ! gh ssh-key list | grep -q "$(cat "$SSH_KEY.pub" | awk '{print $2}')"; then
         gum spin --spinner dot --title "Uploading SSH key to GitHub..." -- \
             gh ssh-key add "$SSH_KEY.pub" --title "Linux-Desktop-BOS$(date +%Y-%m-%d)"
-    else
-        gum style "SSH key already exists on GitHub."
     fi
 }
 
 clone_dotfiles() {
+     # Checks if the host is present. If it's NOT present (using '&& !'), then keyscan is run.
+    ssh-keygen -F github.com 2>/dev/null >/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
     if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
-        gum style --bold --foreground "212" "Cloning dotfiles..."
         local DOTFILES_REPO
         DOTFILES_REPO=$(yq e '.dotfiles_repo' "$CONFIG_FILE")
         gum spin --spinner dot --title "Cloning dotfiles with yadm..." -- \
-            yadm clone "$DOTFILES_REPO" -f
+            yadm --no-bootstrap clone "$DOTFILES_REPO" -f
         gum spin --spinner dot --title "Bootstrapping yadm..." -- yadm bootstrap
-    else
-        gum style "Yadm repo already exists."
     fi
+    sleep 10
 }
 
 # --- Main Function ---
 
 main() {
-    redraw_screen
+    sleep 0.3
+    draw_screen
     check_dependencies
     install_flatpaks
     install_brew_packages
     set_default_shell
-    redraw_screen
+    draw_screen
     setup_ssh_and_github
+    draw_screen
     clone_dotfiles
     gum style --bold --foreground "212" "First time setup complete!"
 }
