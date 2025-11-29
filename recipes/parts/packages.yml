@@ -29,3 +29,4 @@ modules:
   - type: script
     scripts:
       - "install_vscode.sh"
+      - "install_cosmic_clipboard_applet.sh"

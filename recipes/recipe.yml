@@ -41,7 +41,6 @@ modules:
       - name: cosmic
         url: "https://apt.pop-os.org/cosmic/cosmic.flatpakrepo"
         apps:
-          - io.github.cosmic_utils.cosmic-ext-applet-clipboard-manager
     brew:
       formulae:
         - fzf
