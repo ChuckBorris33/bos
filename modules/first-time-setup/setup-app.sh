@@ -105,7 +105,7 @@ clear_info() {
 
 check_dependencies() {
     gum style --bold --foreground "212" "Checking for dependencies..."
-    for tool in gum yq flatpak brew gh; do
+    for tool in gum yq flatpak brew gh git; do
         if ! command -v "$tool" &> /dev/null; then
             gum style --bold --foreground "196" --padding "1 2" --border thick --border-foreground "196" "Error: '$tool' is not installed. Please install it and run the script again."
             exit 1
@@ -183,6 +183,8 @@ set_default_shell() {
 }
 
 setup_ssh_and_github() {
+    # Checks if the host is present. If it's NOT present (using '&& !'), then keyscan is run.
+    ssh-keygen -F github.com 2>/dev/null >/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
     local SSH_KEY="$HOME/.ssh/github"
     eval "$(ssh-agent -s)" &> /dev/null
     if [ ! -f "$SSH_KEY" ]; then
@@ -200,9 +202,36 @@ setup_ssh_and_github() {
     fi
 }
 
+configure_git_identity() {
+    gum style --bold --foreground "212" "Configuring global Git identity..."
+
+    local current_name
+    current_name=$(git config --global user.name)
+    local current_email
+    current_email=$(git config --global user.email)
+
+    gum style --padding "1 2" --border normal --border-foreground "212" \
+        "Current Git Identity:" "Name: $current_name" "Email: $current_email"
+
+    if gum confirm "Do you want to change your Git identity?"; then
+        clear_info
+        # user.name
+        new_name=$(gum input --placeholder "Full name for git commits" --value "$current_name")
+        git config --global user.name "$new_name"
+        clear_info
+
+        gum style --bold --foreground "212" "Configuring global Git identity..."
+
+        # user.email
+        new_email=$(gum input --placeholder "Email for git commits" --value "$current_email")
+        git config --global user.email "$new_email"
+        clear_info
+    else
+        clear_info
+    fi
+}
+
 clone_dotfiles() {
-     # Checks if the host is present. If it's NOT present (using '&& !'), then keyscan is run.
-    ssh-keygen -F github.com 2>/dev/null >/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
     if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
         local DOTFILES_REPO
         DOTFILES_REPO=$(yq e '.dotfiles_repo' "$CONFIG_FILE")
@@ -213,19 +242,41 @@ clone_dotfiles() {
     sleep 10
 }
 
+copy_cosmic_config() {
+    gum style --bold --foreground "212" "Copying COSMIC config..."
+    local source_dir="/usr/share/cosmic"
+    local dest_dir="$HOME/.config/cosmic"
+
+    if [ -d "$source_dir" ]; then
+        mkdir -p "$dest_dir"
+        gum spin --spinner dot --title "Copying COSMIC files..." -- \
+            cp -rfT "$source_dir" "$dest_dir"
+        clear_info
+    else
+        gum style --bold --foreground "226" "Warning: $source_dir not found. Skipping COSMIC config copy."
+        sleep 2
+        clear_info
+    fi
+}
+
 # --- Main Function ---
 
 main() {
     sleep 0.3
     draw_screen
     check_dependencies
+    copy_cosmic_config
+    draw_screen
     install_flatpaks
     install_brew_packages
     set_default_shell
     draw_screen
     setup_ssh_and_github
     draw_screen
+    configure_git_identity
+    draw_screen
     clone_dotfiles
+    draw_screen
     gum style --bold --foreground "212" "First time setup complete!"
 }
 
