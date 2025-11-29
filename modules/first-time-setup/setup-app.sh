@@ -239,7 +239,6 @@ clone_dotfiles() {
             yadm --no-bootstrap clone "$DOTFILES_REPO" -f
         gum spin --spinner dot --title "Bootstrapping yadm..." -- yadm bootstrap
     fi
-    sleep 10
 }
 
 copy_cosmic_config() {
@@ -271,13 +270,26 @@ main() {
     install_brew_packages
     set_default_shell
     draw_screen
-    setup_ssh_and_github
+
+    # Attempt to clone dotfiles first; if it fails, set up SSH/GitHub and retry
+    clone_dotfiles
+    if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
+        draw_screen
+        setup_ssh_and_github
+        draw_screen
+        clone_dotfiles
+    fi
+
     draw_screen
     configure_git_identity
     draw_screen
-    clone_dotfiles
-    draw_screen
+
     gum style --bold --foreground "212" "First time setup complete!"
+    if gum confirm "Do you want to restart now?"; then
+        gum spin --spinner dot --title "Rebooting..." -- sudo systemctl reboot
+    else
+        gum style --foreground "226" "You can reboot later to apply all changes."
+    fi
 }
 
 main

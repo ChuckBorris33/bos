@@ -8,6 +8,7 @@ PREVIOUS_VERSION_FILE="/var/lib/bootc-hooks/version.previous.yaml"
 SWITCH_HOOKS_DIR="/usr/libexec/bootc-hooks/user/switch"
 UPDATE_HOOKS_DIR="/usr/libexec/bootc-hooks/user/update"
 BOOT_HOOKS_DIR="/usr/libexec/bootc-hooks/user/boot"
+hook_failed=false
 
 old_image=""
 old_digest=""
@@ -38,7 +39,10 @@ if [ "${new_image}" != "${old_image}" ]; then
         for hook in "$SWITCH_HOOKS_DIR"/*; do
             if [ -x "$hook" ]; then
                 echo "Running user switch hook: $hook"
-                "$hook"
+                if ! "$hook"; then
+                    echo "User switch hook failed: $hook (exit $?)" >&2
+                    hook_failed=true
+                fi
             fi
         done
     fi
@@ -51,7 +55,10 @@ if [ "${new_digest}" != "${old_digest}" ]; then
         for hook in "$UPDATE_HOOKS_DIR"/*; do
             if [ -x "$hook" ]; then
                 echo "Running user update hook: $hook"
-                "$hook"
+                if ! "$hook"; then
+                    echo "User update hook failed: $hook (exit $?)" >&2
+                    hook_failed=true
+                fi
             fi
         done
     fi
@@ -61,12 +68,18 @@ fi
 echo "Running user boot hooks."
 if [ -d "$BOOT_HOOKS_DIR" ]; then
     for hook in "$BOOT_HOOKS_DIR"/*; do
-        if [ -x "$hook" ];
-        then
+        if [ -x "$hook" ]; then
             echo "Running user boot hook: $hook"
-            "$hook"
+            if ! "$hook"; then
+                echo "User boot hook failed: $hook (exit $?)" >&2
+                hook_failed=true
+            fi
         fi
     done
 fi
 
-echo "User bootc hooks finished."
+if [ "$hook_failed" = true ]; then
+  echo "User bootc hooks finished (with one or more hook failures)."
+else
+  echo "User bootc hooks finished."
+fi

@@ -8,6 +8,7 @@ PREVIOUS_VERSION_FILE="$VERSION_DIR/version.previous.yaml"
 SWITCH_HOOKS_DIR="/usr/libexec/bootc-hooks/system/switch"
 UPDATE_HOOKS_DIR="/usr/libexec/bootc-hooks/system/update"
 BOOT_HOOKS_DIR="/usr/libexec/bootc-hooks/system/boot"
+hook_failed=false
 
 # Create the directory if it doesn't exist
 sudo mkdir -p "$VERSION_DIR"
@@ -49,7 +50,10 @@ if [ "${new_image}" != "${old_image}" ]; then
         for hook in "$SWITCH_HOOKS_DIR"/*; do
             if [ -x "$hook" ]; then
                 echo "Running hook: $hook"
-                "$hook"
+                if ! "$hook"; then
+                    echo "System switch hook failed: $hook (exit $?)" >&2
+                    hook_failed=true
+                fi
             fi
         done
     fi
@@ -61,7 +65,10 @@ if [ "${new_digest}" != "${old_digest}" ]; then
         for hook in "$UPDATE_HOOKS_DIR"/*; do
             if [ -x "$hook" ]; then
                 echo "Running hook: $hook"
-                "$hook"
+                if ! "$hook"; then
+                    echo "System update hook failed: $hook (exit $?)" >&2
+                    hook_failed=true
+                fi
             fi
         done
     fi
@@ -72,7 +79,16 @@ if [ -d "$BOOT_HOOKS_DIR" ]; then
     for hook in "$BOOT_HOOKS_DIR"/*; do
         if [ -x "$hook" ]; then
             echo "Running hook: $hook"
-            "$hook"
+            if ! "$hook"; then
+                echo "System boot hook failed: $hook (exit $?)" >&2
+                hook_failed=true
+            fi
         fi
     done
+fi
+
+if [ "$hook_failed" = true ]; then
+    echo "System bootc hooks finished (with one or more hook failures)."
+else
+    echo "System bootc hooks finished."
 fi
