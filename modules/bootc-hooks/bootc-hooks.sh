@@ -38,15 +38,16 @@ EOF
 # Create the user systemd service file
 cat <<EOF >"$USER_SERVICE_FILE"
 [Unit]
-Description=Run user bootc hooks after login
-After=default.target system-bootc-hooks.service
+Description=Run user bootc hooks after graphical session is available
+After=graphical-session.target system-bootc-hooks.service
+Wants=graphical-session.target
 
 [Service]
 Type=oneshot
 ExecStart=$LIBEXEC_DIR/$USER_SCRIPT_NAME
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
 EOF
 
 # Enable the service
