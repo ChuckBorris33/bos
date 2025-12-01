@@ -16,6 +16,10 @@ CONFIG_DIR=$(dirname "$CONFIG_PATH")
 if [ ! -d "$CONFIG_DIR" ]; then
     mkdir -p "$CONFIG_DIR"
 fi
+
+# Install dependencies if not already installed
+dnf install -y gum yq gh git
+
 #
 # Convert JSON to YAML using yq and save to file
 echo "$JSON_STRING" | yq -p json -o yaml > "$CONFIG_PATH"
