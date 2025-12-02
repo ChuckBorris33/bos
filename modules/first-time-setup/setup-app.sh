@@ -1,9 +1,33 @@
 #!/bin/bash
+set -Eeuo pipefail
+
+LOG_FILE="${HOME}/.cache/bos-first-time-setup.log"
+mkdir -p "$(dirname "$LOG_FILE")"
+echo "--- Setup started at $(date) ---" > "$LOG_FILE"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+export LOG_FILE
+
+log_and_spin() {
+    local title="$1"
+    shift
+    gum spin --spinner dot --title "$title" -- bash -c '"$@" >> "$LOG_FILE" 2>&1' -- "$@" > /dev/tty 2>&1
+}
+
+error_handler() {
+    local exit_code=$?
+    echo
+    echo "An error occurred (exit code: ${exit_code})."
+    echo "See log: ${LOG_FILE}"
+    echo "Press Enter to close..."
+    read -r _
+}
+trap error_handler ERR
 
 # Part 1: Relaunch in Alacritty if needed
 # -----------------------------------------------------------------------------
 # If not running inside the special alacritty session, relaunch into it.
-if [ -z "$IS_IN_ALACRITTY" ]; then
+if [ -z "${IS_IN_ALACRITTY:-}" ]; then
     export IS_IN_ALACRITTY=true
     # Get the absolute path of the script to handle relative paths
     SCRIPT_PATH=$(readlink -f "$0")
@@ -104,8 +128,13 @@ clear_info() {
 # --- Setup Functions ---
 
 check_dependencies() {
+    if ! command -v gum &> /dev/null; then
+        echo "Error: 'gum' is not installed. Please install it and run the script again."
+        exit 1
+    fi
+
     gum style --bold --foreground "212" "Checking for dependencies..."
-    for tool in gum yq flatpak brew gh git; do
+    for tool in yq flatpak brew gh git yadm; do
         if ! command -v "$tool" &> /dev/null; then
             gum style --bold --foreground "196" --padding "1 2" --border thick --border-foreground "196" "Error: '$tool' is not installed. Please install it and run the script again."
             exit 1
@@ -134,7 +163,7 @@ install_flatpaks() {
             remote_url=$(yq e ".flatpak_remotes[$i].url" "$CONFIG_FILE")
 
             if [[ -n "$remote_name" && -n "$remote_url" ]] && ! flatpak remotes --user | grep -q "^$remote_name "; then
-                gum spin --spinner dot --title "Adding Flatpak remote '$remote_name'..." -- \
+                log_and_spin "Adding Flatpak remote '$remote_name'..." \
                     flatpak remote-add --user --if-not-exists "$remote_name" "$remote_url"
             fi
 
@@ -146,7 +175,7 @@ install_flatpaks() {
                     app_id=$(yq e ".flatpak_remotes[$i].apps[$j]" "$CONFIG_FILE")
                     app_counter=$((app_counter + 1))
                     local title="Installing flatpak ($app_counter/$total_apps): $app_id"
-                    gum spin --spinner dot --title "$title" -- \
+                    log_and_spin "$title" \
                         flatpak install --user "$remote_name" -y "$app_id"
                 done
             fi
@@ -163,7 +192,7 @@ install_brew_packages() {
         local current_formula_index=1
         for formula in "${formulae_to_install[@]}"; do
             local title="Installing brew formula ($current_formula_index/$total_formulae): $formula"
-            gum spin --spinner dot --title "$title" -- brew install "$formula"
+            log_and_spin "$title" brew install "$formula"
             ((current_formula_index++))
         done
     fi
@@ -177,18 +206,24 @@ set_default_shell() {
         local shell_path
         shell_path="$(which "$desired_shell")"
         if [ "$(basename "$SHELL")" != "$desired_shell" ]; then
-            chsh -s "$shell_path"
+            gum style --bold --foreground "212" "Changing default shell to $desired_shell..."
+            if chsh -s "$shell_path"; then
+                gum style --foreground "212" "Shell changed successfully."
+            else
+                gum style --foreground "196" "Failed to change shell."
+            fi
         fi
     fi
 }
 
 setup_ssh_and_github() {
     # Checks if the host is present. If it's NOT present (using '&& !'), then keyscan is run.
+    mkdir -p ~/.ssh
     ssh-keygen -F github.com 2>/dev/null >/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
     local SSH_KEY="$HOME/.ssh/github"
     eval "$(ssh-agent -s)" &> /dev/null
     if [ ! -f "$SSH_KEY" ]; then
-        gum spin --spinner dot --title "Generating SSH key..." -- bash -c "ssh-keygen -t ed25519 -f \"$SSH_KEY\" -N \"\" && ssh-add \"$SSH_KEY\""
+        log_and_spin "Generating SSH key..." bash -c "ssh-keygen -t ed25519 -f \"$SSH_KEY\" -N \"\" && ssh-add \"$SSH_KEY\""
     fi
 
     if ! gh auth status &> /dev/null; then
@@ -197,7 +232,7 @@ setup_ssh_and_github() {
     fi
 
     if ! gh ssh-key list | grep -q "$(cat "$SSH_KEY.pub" | awk '{print $2}')"; then
-        gum spin --spinner dot --title "Uploading SSH key to GitHub..." -- \
+        log_and_spin "Uploading SSH key to GitHub..." \
             gh ssh-key add "$SSH_KEY.pub" --title "Linux-Desktop-BOS$(date +%Y-%m-%d)"
     fi
 }
@@ -213,17 +248,17 @@ configure_git_identity() {
     gum style --padding "1 2" --border normal --border-foreground "212" \
         "Current Git Identity:" "Name: $current_name" "Email: $current_email"
 
-    if gum confirm "Do you want to change your Git identity?"; then
+    if gum confirm "Do you want to change your Git identity?" 2> /dev/tty; then
         clear_info
         # user.name
-        new_name=$(gum input --placeholder "Full name for git commits" --value "$current_name")
+        new_name=$(gum input --placeholder "Full name for git commits" --value "$current_name" 2> /dev/tty)
         git config --global user.name "$new_name"
         clear_info
 
         gum style --bold --foreground "212" "Configuring global Git identity..."
 
         # user.email
-        new_email=$(gum input --placeholder "Email for git commits" --value "$current_email")
+        new_email=$(gum input --placeholder "Email for git commits" --value "$current_email" 2> /dev/tty)
         git config --global user.email "$new_email"
         clear_info
     else
@@ -235,9 +270,22 @@ clone_dotfiles() {
     if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
         local DOTFILES_REPO
         DOTFILES_REPO=$(yq e '.dotfiles_repo' "$CONFIG_FILE")
-        gum spin --spinner dot --title "Cloning dotfiles with yadm..." -- \
-            yadm --no-bootstrap clone "$DOTFILES_REPO" -f
-        gum spin --spinner dot --title "Bootstrapping yadm..." -- yadm bootstrap
+
+        if [ -z "$DOTFILES_REPO" ] || [ "$DOTFILES_REPO" = "null" ]; then
+            return 1
+        fi
+
+        # Run yadm from HOME to ensure correct context
+        cd "$HOME" || return 1
+
+        if ! log_and_spin "Cloning dotfiles with yadm..." \
+            yadm --no-bootstrap clone "$DOTFILES_REPO" -f; then
+            return 1
+        fi
+
+        if [ -d "$HOME/.local/share/yadm/repo.git" ]; then
+            log_and_spin "Bootstrapping yadm..." yadm bootstrap
+        fi
     fi
 }
 
@@ -248,7 +296,7 @@ copy_cosmic_config() {
 
     if [ -d "$source_dir" ]; then
         mkdir -p "$dest_dir"
-        gum spin --spinner dot --title "Copying COSMIC files..." -- \
+        log_and_spin "Copying COSMIC files..." \
             cp -rfT "$source_dir" "$dest_dir"
         clear_info
     else
@@ -272,7 +320,7 @@ main() {
     draw_screen
 
     # Attempt to clone dotfiles first; if it fails, set up SSH/GitHub and retry
-    clone_dotfiles
+    clone_dotfiles || true
     if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
         draw_screen
         setup_ssh_and_github
@@ -285,8 +333,8 @@ main() {
     draw_screen
 
     gum style --bold --foreground "212" "First time setup complete!"
-    if gum confirm "Do you want to restart now?"; then
-        gum spin --spinner dot --title "Rebooting..." -- sudo systemctl reboot
+    if gum confirm "Do you want to restart now?" 2> /dev/tty; then
+        log_and_spin "Rebooting..." sudo systemctl reboot
     else
         gum style --foreground "226" "You can reboot later to apply all changes."
     fi
