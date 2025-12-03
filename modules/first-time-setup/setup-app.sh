@@ -40,6 +40,11 @@ fi
 
 CONFIG_FILE="/etc/first_time_setup/config.yaml"
 
+# Ensure brew is in PATH
+if [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
 # --- UI Functions ---
 
 print_art() {
@@ -313,6 +318,7 @@ main() {
     draw_screen
     check_dependencies
     copy_cosmic_config
+    copy_cosmic_config # Some configs are stuborn
     draw_screen
     install_flatpaks
     install_brew_packages
