@@ -246,9 +246,9 @@ configure_git_identity() {
     gum style --bold --foreground "212" "Configuring global Git identity..."
 
     local current_name
-    current_name=$(git config --global user.name)
+    current_name=$(git config --global user.name || echo "")
     local current_email
-    current_email=$(git config --global user.email)
+    current_email=$(git config --global user.email || echo "")
 
     gum style --padding "1 2" --border normal --border-foreground "212" \
         "Current Git Identity:" "Name: $current_name" "Email: $current_email"
@@ -284,7 +284,7 @@ clone_dotfiles() {
         cd "$HOME" || return 1
 
         if ! log_and_spin "Cloning dotfiles with yadm..." \
-            yadm --no-bootstrap clone "$DOTFILES_REPO" -f; then
+            yadm clone "$DOTFILES_REPO" --no-bootstrap  -f; then
             return 1
         fi
 
