@@ -222,6 +222,10 @@ set_default_shell() {
 }
 
 setup_ssh_and_github() {
+    if ! gum confirm "Do you want to set up GitHub login and SSH now?" 2> /dev/tty; then
+        clear_info
+        return
+    fi
     # Checks if the host is present. If it's NOT present (using '&& !'), then keyscan is run.
     mkdir -p ~/.ssh
     ssh-keygen -F github.com 2>/dev/null >/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -272,26 +276,23 @@ configure_git_identity() {
 }
 
 clone_dotfiles() {
-    if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
-        local DOTFILES_REPO
-        DOTFILES_REPO=$(yq e '.dotfiles_repo' "$CONFIG_FILE")
+    local DOTFILES_REPO
+    DOTFILES_REPO=$(yq e '.dotfiles_repo' "$CONFIG_FILE" 2>/dev/null || true)
 
-        if [ -z "$DOTFILES_REPO" ] || [ "$DOTFILES_REPO" = "null" ]; then
-            return 1
-        fi
+    if [ -z "$DOTFILES_REPO" ] || [ "$DOTFILES_REPO" = "null" ]; then
+        return
+    fi
 
-        # Run yadm from HOME to ensure correct context
-        cd "$HOME" || return 1
-
+    if [ -d "$HOME/.local/share/yadm/repo.git" ]; then
+        log_and_spin "Pulling latest changes for dotfiles..." yadm pull
+    else
         if ! log_and_spin "Cloning dotfiles with yadm..." \
-            yadm clone "$DOTFILES_REPO" --no-bootstrap  -f; then
-            return 1
-        fi
-
-        if [ -d "$HOME/.local/share/yadm/repo.git" ]; then
-            log_and_spin "Bootstrapping yadm..." yadm bootstrap
+            yadm clone "$DOTFILES_REPO" --no-bootstrap -f; then
+            return
         fi
     fi
+
+    log_and_spin "Bootstrapping yadm..." yadm bootstrap
 }
 
 copy_cosmic_config() {
@@ -314,26 +315,18 @@ copy_cosmic_config() {
 # --- Main Function ---
 
 main() {
-    sleep 0.3
+    sleep 0.5
     draw_screen
     check_dependencies
     copy_cosmic_config
-    copy_cosmic_config # Some configs are stuborn
     draw_screen
     install_flatpaks
     install_brew_packages
     set_default_shell
     draw_screen
-
-    # Attempt to clone dotfiles first; if it fails, set up SSH/GitHub and retry
-    clone_dotfiles || true
-    if [ ! -d "$HOME/.local/share/yadm/repo.git" ]; then
-        draw_screen
-        setup_ssh_and_github
-        draw_screen
-        clone_dotfiles
-    fi
-
+    clone_dotfiles
+    draw_screen
+    setup_ssh_and_github
     draw_screen
     configure_git_identity
     draw_screen
