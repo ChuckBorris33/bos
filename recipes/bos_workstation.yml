@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# image will be published to ghcr.io/<user>/<name>
+name: bos
+# description will be included in the image's metadata
+description: This is my personal OS image for wokstation.
+
+# the base image to build on top of (FROM) and the version tag to use
+base-image: quay.io/fedora-ostree-desktops/cosmic-atomic
+image-version: 43 # latest is also supported if you want new updates ASAP
+
+# module configuration, executed in order
+# you can include multiple instances of the same module
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: /
+      - source: cosmic
+        destination: /
+  - from-file: "parts/ublue.yml"
+  - from-file: "parts/packages.yml"
+  - from-file: "parts/nvidia.yml"
+  - from-file: "parts/media.yml"
+  - type: dnf
+    install:
+      packages:
+        - libva-nvidia-driver
+  - type: bootc-hooks
+    source: local
+    user:
+      boot:
+        - yadm_pull.sh
+  - type: first-time-setup
+    source: local
+    shell: zsh
+    dotfiles_repo: git@github.com:chuckborris33/dotfiles.git
+    flatpak_remotes:
+      - name: flathub
+        url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        apps:
+          - com.github.IsmaelMartinez.teams_for_linux
+          - com.spotify.Client
+          - io.beekeeperstudio.Studio
+          - io.github.betaflight.BetaflightConfigurator
+          - dev.edfloreshz.CosmicTweaks
+      - name: cosmic
+        url: "https://apt.pop-os.org/cosmic/cosmic.flatpakrepo"
+        apps:
+    brew:
+      formulae:
+        - fzf
+        - starship
+        - helix
+        - neovim
+        - bat
+        - ripgrep
+        - fd
+        - eza
+        - zoxide
+        - tldr
+        - fnm
+        - uv
+        - direnv
+        - zellij
+  - type: script
+    snippets:
+      - authselect select local with-silent-lastlog with-fingerprint
+    scripts:
+      - install_vscode.sh
+      - install_cosmic_clipboard_applet.sh
+  - from-file: "parts/final.yml"

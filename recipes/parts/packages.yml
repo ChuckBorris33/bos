@@ -19,12 +19,7 @@ modules:
         - toolbox
         - zed
         - openconnect
-        # Graphics
-        - mesa-vulkan-drivers
-        - vulkan-tools
+        # Networking
+        - tailscale
   - type: brew
     nofile-limits: true
-  - type: script
-    scripts:
-      - "install_vscode.sh"
-      - "install_cosmic_clipboard_applet.sh"

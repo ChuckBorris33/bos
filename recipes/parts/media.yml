@@ -4,7 +4,7 @@ modules:
       - rpmfusion
   - type: script
     snippets:
-      - "dnf -y swap ffmpeg-free ffmpeg --allowerasing" 
+      - "dnf -y swap ffmpeg-free ffmpeg --allowerasing"
   - type: dnf
     group-install:
       install-weak-deps: false
@@ -15,7 +15,6 @@ modules:
   - type: dnf
     install:
       packages:
-        - libva-nvidia-driver
         - ffmpeg-libs
         - libva
         - libva-utils
@@ -33,5 +32,3 @@ modules:
     snippets:
       - "dnf config-manager setopt fedora-cisco-openh264.enabled=1"
   # TODO firefox h264
-
-
