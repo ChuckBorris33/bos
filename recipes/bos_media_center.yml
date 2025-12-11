@@ -19,10 +19,6 @@ modules:
   - from-file: "parts/ublue.yml"
   - from-file: "parts/packages.yml"
   - from-file: "parts/media.yml"
-  - type: dnf
-    install:
-      packages:
-        - quadlet
   - type: bootc-hooks
     source: local
     user:
@@ -30,14 +26,16 @@ modules:
         - yadm_pull.sh
   - type: first-time-setup
     source: local
-    shell: zsh
-    dotfiles_repo: git@github.com:chuckborris33/dotfiles.git
-    flatpak_remotes:
-      - name: flathub
-        url: https://dl.flathub.org/repo/flathub.flatpakrepo
-        apps:
-          - com.spotify.Client
-    brew:
+    set_default_shell:
+      shell: zsh
+    clone_dotfiles:
+      repo: git@github.com:chuckborris33/dotfiles.git
+    install_flatpaks:
+      remotes:
+        - name: flathub
+          url: https://dl.flathub.org/repo/flathub.flatpakrepo
+          apps:
+    install_brew_packages:
       formulae:
         - fzf
         - starship
@@ -50,8 +48,11 @@ modules:
         - tldr
         - direnv
         - zellij
+    configure_git_identity: true
+    setup_ssh_and_github: true
+    setup_tailscale: true
   - type: script
     scripts:
       - "setup_steam_kiosk.sh"
   - from-file: "parts/final.yml"
-  # Qadlet with seafile, jellyfin, tailscale, vaultwarden, zitadel
+  # Qadlet with seafile, jellyfin, tailscale, vaultwarden

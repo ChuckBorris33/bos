@@ -1,12 +1,19 @@
 #!/bin/bash
+# This script provides UI and utility functions for the first-time setup process.
+# It is intended to be included by the main generated setup script.
+
 set -Eeuo pipefail
 
-LOG_FILE="${HOME}/.cache/bos-first-time-setup.log"
-mkdir -p "$(dirname "$LOG_FILE")"
-echo "--- Setup started at $(date) ---" > "$LOG_FILE"
-exec > >(tee -a "$LOG_FILE") 2>&1
+export LOG_FILE="${HOME}/.cache/bos-first-time-setup.log"
 
-export LOG_FILE
+# Only create the log file and redirect output if this is the main process
+if [ -z "${_FTS_CHILD_PROCESS:-}" ]; then
+    mkdir -p "$(dirname "$LOG_FILE")"
+    echo "--- Setup started at $(date) ---" > "$LOG_FILE"
+    # Set environment variable to prevent child processes from redirecting output again
+    export _FTS_CHILD_PROCESS=true
+    exec > >(tee -a "$LOG_FILE") 2>&1
+fi
 
 log_and_spin() {
     local title="$1"
@@ -38,7 +45,7 @@ fi
 # Part 2: Main script logic
 # -----------------------------------------------------------------------------
 
-CONFIG_FILE="/etc/first_time_setup/config.yaml"
+export CONFIG_FILE="/etc/first_time_setup/config.yaml"
 
 # Ensure brew is in PATH
 if [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
@@ -129,214 +136,3 @@ clear_info() {
     tput ed
     tput cup $((total_lines - 3)) 0 2>/dev/null || true
 }
-
-# --- Setup Functions ---
-
-check_dependencies() {
-    if ! command -v gum &> /dev/null; then
-        echo "Error: 'gum' is not installed. Please install it and run the script again."
-        exit 1
-    fi
-
-    gum style --bold --foreground "212" "Checking for dependencies..."
-    for tool in yq flatpak brew gh git yadm; do
-        if ! command -v "$tool" &> /dev/null; then
-            gum style --bold --foreground "196" --padding "1 2" --border thick --border-foreground "196" "Error: '$tool' is not installed. Please install it and run the script again."
-            exit 1
-        fi
-    done
-    clear_info
-}
-
-install_flatpaks() {
-    if [ -n "$(yq e '.flatpak_remotes[]' "$CONFIG_FILE")" ]; then
-        local total_apps=0
-        local app_lengths
-        app_lengths=$(yq e '.flatpak_remotes[].apps | length' "$CONFIG_FILE" 2>/dev/null || echo "")
-        if [ -n "$app_lengths" ]; then
-          for length in $app_lengths; do
-            total_apps=$((total_apps + length))
-          done
-        fi
-        local app_counter=0
-        local remotes_count
-        remotes_count=$(yq e '.flatpak_remotes | length' "$CONFIG_FILE")
-
-        for i in $(seq 0 $((remotes_count - 1))); do
-            local remote_name remote_url
-            remote_name=$(yq e ".flatpak_remotes[$i].name" "$CONFIG_FILE")
-            remote_url=$(yq e ".flatpak_remotes[$i].url" "$CONFIG_FILE")
-
-            if [[ -n "$remote_name" && -n "$remote_url" ]] && ! flatpak remotes --user | grep -q "^$remote_name "; then
-                log_and_spin "Adding Flatpak remote '$remote_name'..." \
-                    flatpak remote-add --user --if-not-exists "$remote_name" "$remote_url"
-            fi
-
-            local apps_count
-            apps_count=$(yq e ".flatpak_remotes[$i].apps | length" "$CONFIG_FILE")
-            if [ "$apps_count" -gt 0 ]; then
-                for j in $(seq 0 $((apps_count - 1))); do
-                    local app_id
-                    app_id=$(yq e ".flatpak_remotes[$i].apps[$j]" "$CONFIG_FILE")
-                    app_counter=$((app_counter + 1))
-                    local title="Installing flatpak ($app_counter/$total_apps): $app_id"
-                    log_and_spin "$title" \
-                        flatpak install --user "$remote_name" -y "$app_id"
-                done
-            fi
-        done
-    fi
-}
-
-install_brew_packages() {
-    local formulae_to_install
-    formulae_to_install=($(yq e '.brew.formulae[]' "$CONFIG_FILE" 2>/dev/null))
-    local total_formulae=${#formulae_to_install[@]}
-
-    if [ "$total_formulae" -gt 0 ]; then
-        local current_formula_index=1
-        for formula in "${formulae_to_install[@]}"; do
-            local title="Installing brew formula ($current_formula_index/$total_formulae): $formula"
-            log_and_spin "$title" brew install "$formula"
-            ((current_formula_index++))
-        done
-    fi
-}
-
-set_default_shell() {
-    local desired_shell
-    desired_shell=$(yq e '.shell' "$CONFIG_FILE")
-
-    if [ -n "$desired_shell" ] && command -v "$desired_shell" &>/dev/null; then
-        local shell_path
-        shell_path="$(which "$desired_shell")"
-        if [ "$(basename "$SHELL")" != "$desired_shell" ]; then
-            gum style --bold --foreground "212" "Changing default shell to $desired_shell..."
-            if chsh -s "$shell_path"; then
-                gum style --foreground "212" "Shell changed successfully."
-            else
-                gum style --foreground "196" "Failed to change shell."
-            fi
-        fi
-    fi
-}
-
-setup_ssh_and_github() {
-    if ! gum confirm "Do you want to set up GitHub login and SSH now?" 2> /dev/tty; then
-        clear_info
-        return
-    fi
-    # Checks if the host is present. If it's NOT present (using '&& !'), then keyscan is run.
-    mkdir -p ~/.ssh
-    ssh-keygen -F github.com 2>/dev/null >/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
-    local SSH_KEY="$HOME/.ssh/github"
-    eval "$(ssh-agent -s)" &> /dev/null
-    if [ ! -f "$SSH_KEY" ]; then
-        log_and_spin "Generating SSH key..." bash -c "ssh-keygen -t ed25519 -f \"$SSH_KEY\" -N \"\" && ssh-add \"$SSH_KEY\""
-    fi
-
-    if ! gh auth status &> /dev/null; then
-        gh auth login -s admin:public_key -p ssh --skip-ssh-key -wc
-        clear_info
-    fi
-
-    if ! gh ssh-key list | grep -q "$(cat "$SSH_KEY.pub" | awk '{print $2}')"; then
-        log_and_spin "Uploading SSH key to GitHub..." \
-            gh ssh-key add "$SSH_KEY.pub" --title "Linux-Desktop-BOS$(date +%Y-%m-%d)"
-    fi
-}
-
-configure_git_identity() {
-    gum style --bold --foreground "212" "Configuring global Git identity..."
-
-    local current_name
-    current_name=$(git config --global user.name || echo "")
-    local current_email
-    current_email=$(git config --global user.email || echo "")
-
-    gum style --padding "1 2" --border normal --border-foreground "212" \
-        "Current Git Identity:" "Name: $current_name" "Email: $current_email"
-
-    if gum confirm "Do you want to change your Git identity?" 2> /dev/tty; then
-        clear_info
-        # user.name
-        new_name=$(gum input --placeholder "Full name for git commits" --value "$current_name" 2> /dev/tty)
-        git config --global user.name "$new_name"
-        clear_info
-
-        gum style --bold --foreground "212" "Configuring global Git identity..."
-
-        # user.email
-        new_email=$(gum input --placeholder "Email for git commits" --value "$current_email" 2> /dev/tty)
-        git config --global user.email "$new_email"
-        clear_info
-    else
-        clear_info
-    fi
-}
-
-clone_dotfiles() {
-    local DOTFILES_REPO
-    DOTFILES_REPO=$(yq e '.dotfiles_repo' "$CONFIG_FILE" 2>/dev/null || true)
-
-    if [ -z "$DOTFILES_REPO" ] || [ "$DOTFILES_REPO" = "null" ]; then
-        return
-    fi
-
-    if [ -d "$HOME/.local/share/yadm/repo.git" ]; then
-        log_and_spin "Pulling latest changes for dotfiles..." yadm pull
-    else
-        if ! log_and_spin "Cloning dotfiles with yadm..." \
-            yadm clone "$DOTFILES_REPO" --no-bootstrap -f; then
-            return
-        fi
-    fi
-
-    log_and_spin "Bootstrapping yadm..." yadm bootstrap
-}
-
-copy_cosmic_config() {
-    gum style --bold --foreground "212" "Copying COSMIC config..."
-    local source_dir="/usr/share/cosmic"
-    local dest_dir="$HOME/.config/cosmic"
-
-    if [ -d "$source_dir" ]; then
-        mkdir -p "$dest_dir"
-        log_and_spin "Copying COSMIC files..." \
-            cp -rfT "$source_dir" "$dest_dir"
-        clear_info
-    else
-        gum style --bold --foreground "226" "Warning: $source_dir not found. Skipping COSMIC config copy."
-        sleep 2
-        clear_info
-    fi
-}
-
-# --- Main Function ---
-
-main() {
-    sleep 0.5
-    draw_screen
-    check_dependencies
-    copy_cosmic_config
-    draw_screen
-    install_flatpaks
-    install_brew_packages
-    set_default_shell
-    draw_screen
-    clone_dotfiles
-    draw_screen
-    setup_ssh_and_github
-    draw_screen
-    configure_git_identity
-    draw_screen
-
-    gum style --bold --foreground "212" "First time setup complete!"
-    if gum confirm "Do you want to restart now?" 2> /dev/tty; then
-        log_and_spin "Rebooting..." sudo systemctl reboot
-    else
-        gum style --foreground "226" "You can reboot later to apply all changes."
-    fi
-}
-
-main
