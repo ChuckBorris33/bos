@@ -55,4 +55,4 @@ modules:
     scripts:
       - "setup_steam_kiosk.sh"
   - from-file: "parts/final.yml"
-  # Qadlet with seafile, jellyfin, tailscale, vaultwarden
+  # Qadlet with seafile, filestash, jellyfin, tailscale, vaultwarden

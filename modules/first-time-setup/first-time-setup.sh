@@ -27,11 +27,14 @@ echo "$JSON_STRING" | yq -p json -o yaml > "$CONFIG_PATH"
 # --- Script Generation ---
 echo "Generating the first-time setup script at $GENERATED_SCRIPT_PATH"
 
+# Ensure the destination directory exists
+mkdir -p "$(dirname "$GENERATED_SCRIPT_PATH")"
+
 # 1. Start with the utility script content (shebang, UI functions, etc.)
 cat "$MODULE_DIRECTORY/first-time-setup/setup-app.sh" > "$GENERATED_SCRIPT_PATH"
 
 # 2. Get the list of modules to include from the config and aggregate their dependencies
-MODULE_NAMES=$(yq e '.modules | keys | .[]' "$CONFIG_PATH")
+MODULE_NAMES=$(yq e '(.modules // {}) | keys | .[]' "$CONFIG_PATH")
 ALL_DEPS=""
 
 for MODULE_NAME in $MODULE_NAMES; do
