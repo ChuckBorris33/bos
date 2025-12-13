@@ -23,9 +23,17 @@ modules:
   - from-file: "parts/nvidia.yml"
   - from-file: "parts/media.yml"
   - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
     install:
       packages:
         - libva-nvidia-driver
+        - alacritty
+        - zed
+        - openconnect
+
   - type: bootc-hooks
     source: local
     user:

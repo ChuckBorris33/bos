@@ -33,8 +33,8 @@ trap error_handler ERR
 
 # Part 1: Relaunch in Alacritty if needed
 # -----------------------------------------------------------------------------
-# If not running inside the special alacritty session, relaunch into it.
-if [ -z "${IS_IN_ALACRITTY:-}" ]; then
+# If not running inside the special alacritty session, and alacritty is available, relaunch into it.
+if [ -z "${IS_IN_ALACRITTY:-}" ] && command -v alacritty &> /dev/null; then
     export IS_IN_ALACRITTY=true
     # Get the absolute path of the script to handle relative paths
     SCRIPT_PATH=$(readlink -f "$0")

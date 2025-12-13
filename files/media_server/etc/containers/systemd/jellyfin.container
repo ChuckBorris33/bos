@@ -1,0 +1,47 @@
+# /etc/containers/systemd/jellyfin.container
+#
+# This Quadlet file runs the Jellyfin media server as a systemd service.
+#
+# To use:
+# 1. Place this file in /etc/containers/systemd/
+# 2. On the host, create the media directory at /var/server_storage/media.
+#    This can be a Btrfs subvolume for snapshotting.
+#    sudo btrfs subvolume create /var/server_storage
+#    sudo mkdir /var/server_storage/media
+#    sudo chown -R jellyfin:jellyfin /var/server_storage/media
+# 3. Reload systemd: systemctl daemon-reload
+# 4. Start and enable the service: systemctl enable --now jellyfin.service
+
+[Unit]
+Description=Jellyfin Media Server
+
+[Container]
+# Use the official Jellyfin image
+Image=docker.io/jellyfin/jellyfin:latest
+ContainerName=jellyfin
+User=jellyfin
+
+# Expose the web UI port only on the host's loopback interface
+PublishPort=127.0.0.1:8096:8096/tcp
+
+# --- Volumes ---
+# Mount the media directory.
+# The ":Z" at the end handles SELinux permissions.
+Volume=/var/server_storage/media:/media:Z
+
+# Persist configuration and cache on the host machine
+Volume=/opt/jellyfin/config:/config:Z
+Volume=/opt/jellyfin/cache:/cache:Z
+
+# --- Hardware Acceleration ---
+# Pass through the GPU for hardware transcoding (e.g., Intel QSV, AMD VAAPI).
+# This is for Intel/AMD. For NVIDIA, you might need different setup.
+Device=/dev/dri:/dev/dri
+
+# --- Restart Policy ---
+# Automatically restart the container if it fails.
+Restart=on-failure
+
+[Install]
+# Start this service automatically on boot
+WantedBy=multi-user.target

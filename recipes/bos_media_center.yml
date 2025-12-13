@@ -16,6 +16,10 @@ modules:
     files:
       - source: system
         destination: /
+  - type: files
+    files:
+      - source: media_server
+        destination: /
   - from-file: "parts/ublue.yml"
   - from-file: "parts/packages.yml"
   - from-file: "parts/media.yml"
@@ -51,8 +55,11 @@ modules:
     configure_git_identity: true
     setup_ssh_and_github: true
     setup_tailscale: true
+    setup_steam_kiosk: true
+    setup_media_services: true
   - type: script
     scripts:
-      - "setup_steam_kiosk.sh"
+      - "install_steam.sh"
   - from-file: "parts/final.yml"
-  # Qadlet with seafile, filestash, jellyfin, tailscale, vaultwarden
+  # Qadlet with filebrowser, jellyfin, tailscale, dnsmasq
+  # Later seefile, vaultwarden

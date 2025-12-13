@@ -1,0 +1,27 @@
+# /etc/caddy/Caddyfile
+#
+# This file configures Caddy to reverse proxy to your local services
+# using the short names defined in your dnsmasq hosts file.
+#
+# Caddy will automatically generate and serve self-signed SSL certificates
+# for these names. Your browser will show a one-time warning that you
+# will need to accept.
+
+# --- IMPORTANT ---
+# Replace "100.X.Y.Z" with your server's Tailscale IP address (`tailscale ip -4`)
+# to ensure Caddy only listens on the Tailscale network.
+
+media.home {
+	bind 100.X.Y.Z
+    reverse_proxy localhost:8096
+}
+
+fsync.home {
+	bind 100.X.Y.Z
+    reverse_proxy localhost:8000
+}
+
+pass.home {
+	bind 100.X.Y.Z
+    reverse_proxy localhost:8080
+}

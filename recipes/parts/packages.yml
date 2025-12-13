@@ -2,23 +2,18 @@ modules:
   - type: dnf
     repos:
       cleanup: true
-      files:
-        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
       copr:
         enable:
           - cdayjr/yadm
     install:
       packages:
         # Terminal
-        - alacritty
         - zsh
         - yadm
         # Devel
         - distrobox
         - podman
         - toolbox
-        - zed
-        - openconnect
         # Networking
         - tailscale
   - type: brew

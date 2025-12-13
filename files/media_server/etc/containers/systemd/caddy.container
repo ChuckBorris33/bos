@@ -1,0 +1,38 @@
+# /etc/containers/systemd/caddy.container
+#
+# This Quadlet file runs the Caddy web server as a systemd service.
+# It acts as a reverse proxy for other services.
+#
+# To use:
+# 1. Place this file in /etc/containers/systemd/
+# 2. Ensure /etc/caddy/Caddyfile is present on the host.
+# 3. Create host directories for persistent data:
+#    sudo mkdir -p /opt/caddy/config /opt/caddy/data
+# 4. Reload systemd: systemctl daemon-reload
+# 5. Start and enable the service: systemctl enable --now caddy.service
+
+[Unit]
+Description=Caddy Web Server
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName=caddy
+Image=docker.io/library/caddy:latest
+User=caddy
+
+# Use host networking to allow Caddy to proxy to other containers
+# that have published ports on the host.
+Network=host
+
+# Volumes for Caddyfile, configuration, and data.
+# The ":Z" at the end handles SELinux permissions.
+Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
+Volume=/opt/caddy/config:/config:Z
+Volume=/opt/caddy/data:/data:Z
+
+Restart=on-failure
+
+[Install]
+# Start this service automatically on boot
+WantedBy=multi-user.target

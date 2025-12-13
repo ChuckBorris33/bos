@@ -1,0 +1,31 @@
+# /etc/containers/systemd/filebrowser.container
+#
+# This Quadlet file runs File Browser as a systemd service.
+#
+# To use:
+# 1. Place this file in /etc/containers/systemd/
+# 2. On the host, create the media directory at /var/server_storage/media.
+# 3. Reload systemd: systemctl daemon-reload
+# 4. Start and enable the service: systemctl enable --now filebrowser.service
+
+[Unit]
+Description=File Browser
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=docker.io/filebrowser/filebrowser:latest
+ContainerName=filebrowser
+User=filebrowser
+
+# Expose web UI on localhost only, Caddy will reverse proxy
+PublishPort=127.0.0.1:8088:80
+
+# Mount the media directory to serve and a database file for persistence
+Volume=/var/server_storage/media:/srv:Z
+Volume=/opt/filebrowser/database.db:/database.db:Z
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
