@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+echo "Waiting for Tailscale IP..."
+while ! MEDIA_SERVER_IP=$(tailscale ip -4 2>/dev/null); [ -z "$MEDIA_SERVER_IP" ]; do
+  sleep 2
+done
+echo "Found Tailscale IP: ${MEDIA_SERVER_IP}"
+export MEDIA_SERVER_IP
+
+# Source the service definitions
+set -a
+if [ -f /etc/bos/media_server/config.sh ]; then
+  . /etc/bos/media_server/config.sh
+fi
+set +a
+
+TPL_DIR="/etc/bos/media_server_templates"
+
+echo "Generating Caddyfile..."
+mkdir -p /etc/caddy
+envsubst < "${TPL_DIR}/Caddyfile.tpl" > /etc/caddy/Caddyfile
+
+echo "Generating dnsmasq hosts config..."
+mkdir -p /opt/dnsmasq/dnsmasq.d
+envsubst < "${TPL_DIR}/hosts.conf.tpl" > /opt/dnsmasq/dnsmasq.d/hosts.conf
+
+echo "Generating dnsmasq container config..."
+mkdir -p /etc/containers/systemd
+envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.container
+
+echo "Configuration generation complete."

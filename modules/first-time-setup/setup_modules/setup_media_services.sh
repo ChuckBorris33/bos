@@ -50,20 +50,6 @@ setup_media_services() {
         chown -R filebrowser:filebrowser /opt/filebrowser
     '
 
-    # Get Tailscale IP
-    log_and_spin "Getting Tailscale IP..." \
-        bash -c 'TS_IP=$(tailscale ip -4 2>/dev/null); if [ -z "$TS_IP" ]; then echo "Error: Could not get Tailscale IP. Make sure Tailscale is connected." >&2; exit 1; fi; echo "$TS_IP"'
-
-    local TS_IP
-    TS_IP=$(tailscale ip -4 2>/dev/null)
-    if [ -z "$TS_IP" ]; then
-        gum style --bold --foreground "196" "Error: Could not get Tailscale IP. Make sure Tailscale is connected."
-        return 1
-    fi
-
-    gum style --foreground "226" "Found Tailscale IP: $TS_IP"
-    sleep 1
-
     # Create storage
     if [ ! -d /var/server_storage ]; then
         log_and_spin "Creating Btrfs subvolume at /var/server_storage..." \
@@ -88,36 +74,17 @@ setup_media_services() {
         chmod -R u=rwX,g=rwX,o=rX /var/server_storage/downloads
         '
 
-    # Template and destination paths
-    local TEMPLATE_DIR="/etc/bos/media_server_templates"
-    local CADDYFILE_TEMPLATE="$TEMPLATE_DIR/Caddyfile"
-    local DNSMASQ_HOSTS_TEMPLATE="$TEMPLATE_DIR/hosts.conf"
-    local DNSMASQ_CONTAINER_TEMPLATE="$TEMPLATE_DIR/dnsmasq.container"
-
-    local CADDYFILE_DEST="/etc/caddy/Caddyfile"
-    local DNSMASQ_HOSTS_DEST="/opt/dnsmasq/dnsmasq.d/hosts.conf"
-    local SYSTEMD_DEST="/etc/containers/systemd"
-
-    # Process and copy files
-    log_and_spin "Processing configuration files..." \
-        bash -c "
-        mkdir -p \"\$(dirname \"$CADDYFILE_DEST\")\"
-        sed \"s/100.X.Y.Z/$TS_IP/g\" \"$CADDYFILE_TEMPLATE\" > \"$CADDYFILE_DEST\"
-
-        mkdir -p \"\$(dirname \"$DNSMASQ_HOSTS_DEST\")\"
-        sed \"s/100.X.Y.Z/$TS_IP/g\" \"$DNSMASQ_HOSTS_TEMPLATE\" > \"$DNSMASQ_HOSTS_DEST\"
-
-        mkdir -p \"$SYSTEMD_DEST\"
-        sed \"s/100.X.Y.Z/$TS_IP/g\" \"$DNSMASQ_CONTAINER_TEMPLATE\" > \"$SYSTEMD_DEST/dnsmasq.container\"
-        "
-
     # Reload and enable services
     log_and_spin "Reloading systemd and enabling media services..." \
         bash -c '
         systemctl daemon-reload
+        # The subst service will run once and generate all necessary configs.
+        # The other services will be started after it has completed.
+        systemctl enable --now media-config-subst.service
         systemctl enable --now caddy.service
         systemctl enable --now dnsmasq.service
         systemctl enable --now jellyfin.service
+        systemctl enable --now filebrowser.service
         '
 
     gum style --bold --foreground "212" "Media services setup complete!"
