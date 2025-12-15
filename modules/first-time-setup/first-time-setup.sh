@@ -34,7 +34,7 @@ mkdir -p "$(dirname "$GENERATED_SCRIPT_PATH")"
 cat "$MODULE_DIRECTORY/first-time-setup/setup-app.sh" > "$GENERATED_SCRIPT_PATH"
 
 # 2. Get the list of modules to include from the config and aggregate their dependencies
-MODULE_NAMES=$(yq e '(.modules // {}) | keys | .[]' "$CONFIG_PATH")
+MODULE_NAMES=$(yq e 'keys | .[] | select(. != "type")' "$CONFIG_PATH")
 ALL_DEPS=""
 
 for MODULE_NAME in $MODULE_NAMES; do
