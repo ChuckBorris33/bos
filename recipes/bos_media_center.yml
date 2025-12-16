@@ -59,6 +59,7 @@ modules:
     setup_media_services: true
   - type: script
     scripts:
+      - "install_lxqt_wayland.sh"
       - "install_steam.sh"
   - from-file: "parts/final.yml"
   # Qadlet with filebrowser, jellyfin, tailscale, dnsmasq
