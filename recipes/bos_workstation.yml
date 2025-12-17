@@ -30,7 +30,6 @@ modules:
     install:
       packages:
         - libva-nvidia-driver
-        - alacritty
         - zed
         - openconnect
 

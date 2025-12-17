@@ -6,7 +6,7 @@ name: bosm
 description: This is my personal OS image for home lab/media center.
 
 # the base image to build on top of (FROM) and the version tag to use
-base-image: quay.io/fedora-ostree-desktops/base-atomic
+base-image: quay.io/fedora-ostree-desktops/sway-atomic
 image-version: 43 # latest is also supported if you want new updates ASAP
 
 # module configuration, executed in order
@@ -59,7 +59,6 @@ modules:
     setup_media_services: true
   - type: script
     scripts:
-      - "install_lxqt_wayland.sh"
       - "install_steam.sh"
   - from-file: "parts/final.yml"
   # Qadlet with filebrowser, jellyfin, tailscale, dnsmasq

@@ -10,6 +10,7 @@ modules:
         # Terminal
         - zsh
         - yadm
+        - alacritty
         # Devel
         - distrobox
         - podman
