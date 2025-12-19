@@ -27,7 +27,7 @@ jobs:
       matrix:
         recipe:
           # !! Add your recipes here
-          - bos_wokstation.yml
+          - bos_workstation.yml
           - bos_media_center.yml
     steps:
       # the build is fully handled by the reusable github action
