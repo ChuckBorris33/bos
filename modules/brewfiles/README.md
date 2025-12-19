@@ -1,6 +1,6 @@
 # Brewfile Module
 
-This module copies specified `Brewfile` files to `/usr/local/etc/brewfiles` and can optionally validate them. This is useful for ensuring that Homebrew packages are managed consistently within the image.
+This module copies specified `Brewfile` files to `/usr/local/etc/brewfiles`. This is useful for ensuring that Homebrew packages are managed consistently within the image.
 
 ## Usage
 
@@ -25,7 +25,6 @@ To use this module, add it to your `recipe.yml`. You need to provide a list of `
           - Brewfile.base
           - Brewfile.workstation
         # If true, runs 'brew bundle check' for each file
-        validate: true
     ```
 
 ## How It Works
@@ -33,5 +32,4 @@ To use this module, add it to your `recipe.yml`. You need to provide a list of `
 The module performs the following actions:
 
 1.  Reads the `include` list from your configuration.
-2.  Copies each specified `Brewfile` from `files/brewfiles/` into `/usr/local/etc/brewfiles/`.
-3.  If `validate` is set to `true`, it will run `brew bundle check --file=<path>` for each Brewfile to verify that all dependencies are listed correctly.
+2.  Copies each specified `Brewfile` from `files/brewfiles/` into `/usr/share/brewfiles/`.

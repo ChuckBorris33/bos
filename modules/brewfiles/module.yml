@@ -5,4 +5,3 @@ example: |
   include:
     - Brewfile.base
     - Brewfile.workstation
-  validate: true

@@ -3,7 +3,7 @@
 install-default-brew:
     #!/usr/bin/env bash
     echo "Installing applications via Homebrew..."
-    brew bundle --file /usr/share/ublue-os/homebrew/default.Brewfile
+    brew bundle --file /usr/share/brewfiles/default.Brewfile
 
 [group('Apps')]
 install-default-flatpaks:

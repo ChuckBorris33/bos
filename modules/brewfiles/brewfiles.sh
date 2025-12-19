@@ -7,7 +7,7 @@ echo "Running brewfile module"
 # --- Configuration ---
 JSON_CONFIG="$1"
 BREWFILE_SOURCE_DIR="$CONFIG_DIRECTORY/brewfiles"
-BREWFILE_DEST_DIR="/usr/local/etc/brewfiles"
+BREWFILE_DEST_DIR="/usr/share/brewfiles"
 
 # --- Parse Config ---
 # Use jq to extract the 'include' array into a bash array

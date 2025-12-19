@@ -9,6 +9,7 @@ copy-cosmic-config:
         mkdir -p "$dest_dir"
         echo "Copying COSMIC files..."
         cp -rfT "$source_dir" "$dest_dir"
+        cp -rfT "$source_dir" "$dest_dir"
     else
         echo "Warning: $source_dir not found. Skipping COSMIC config copy."
     fi

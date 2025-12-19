@@ -11,6 +11,7 @@ modules:
         - zsh
         - yadm
         - alacritty
+        - gum
         # Devel
         - distrobox
         - podman

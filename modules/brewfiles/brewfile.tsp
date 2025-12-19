@@ -14,6 +14,4 @@ model BrewfilesModuleV1 {
   type: "brewfiles" | "brewfiles@v1" | "brewfiles@latest";
   /** A list of Brewfile names to include. */
   include: string[];
-  /** Whether to validate the Brewfiles after copying. */
-  validate?: boolean;
 }

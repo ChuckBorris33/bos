@@ -76,4 +76,5 @@ setup-tailscale:
     fi
 
     echo "Connecting to Tailscale..."
-    tailscale up --authkey="$auth_key" --hostname="bos-$(hostname)"
+    sudo systemctl start tailscaled
+    sudo tailscale up --authkey="$auth_key" --hostname="bos-$(hostname)"
