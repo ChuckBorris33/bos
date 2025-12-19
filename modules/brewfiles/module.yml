@@ -1,0 +1,8 @@
+name: brewfiles
+shortdesc: The brewfiles module copies Brewfiles to the system for installation.
+example: |
+  type: brewfiles
+  include:
+    - Brewfile.base
+    - Brewfile.workstation
+  validate: true

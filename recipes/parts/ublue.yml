@@ -1,14 +1,5 @@
 modules:
-  - type: containerfile
-    snippets:
-      - COPY --from=ghcr.io/ublue-os/akmods:main-43 /rpms /tmp/rpms
-      - COPY --from=ghcr.io/ublue-os/akmods:main-43 /kernel-rpms /tmp/rpms/kernel
-      - RUN find /tmp/rpms
-      - RUN rpm -q ublue-os-akmods-addons || rpm-ostree install /tmp/rpms/ublue-os/ublue-os-akmods-addons*.rpm
-  - type: script
-    scripts:
-      - installsignedkernel.sh
-  - type: dnf 
+  - type: dnf
     repos:
       cleanup: true
       copr:
@@ -20,17 +11,9 @@ modules:
         - uupd
         - ublue-os-just
         - ublue-os-udev-rules
-        - ublue-os-update-services
         - ublue-os-signing
         - ublue-os-luks
-        - ublue-os-just
   - type: systemd
     system:
       enabled:
-        - uupd.service
-  - type: script
-    scripts:
-      - ensureautoupdates.sh
-      # Add image info
-      - removeunusedrepos.sh
-
+        - uupd.timer

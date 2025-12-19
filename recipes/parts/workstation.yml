@@ -1,0 +1,58 @@
+modules:
+  - type: files
+    files:
+      - source: workstation
+        destination: /
+  - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
+    install:
+      packages:
+        - zed
+        - openconnect
+  - type: justfiles
+    include:
+      - apps.just
+      - setup.just
+      - system.just
+      - workstation.just
+  - type: brewfiles
+    source: local
+    include:
+      - default.Brewfile
+    validate: true
+  - type: default-flatpaks
+    configurations:
+      - scope: user
+        repo:
+          # you can override the title to make inclusion of both system and user repos clearer
+          title: Flathub (user)
+        install:
+          - com.github.IsmaelMartinez.teams_for_linux
+          - com.spotify.Client
+          - io.beekeeperstudio.Studio
+          - io.github.betaflight.BetaflightConfigurator
+          - dev.edfloreshz.CosmicTweaks
+      - scope: user
+        repo:
+          title: Cosmic (user)
+          url: "https://apt.pop-os.org/cosmic/cosmic.flatpakrepo"
+        install: []
+  - type: secure-dns
+    provider: quad9
+    source: local
+  - type: fonts
+    fonts:
+      nerd-fonts:
+        - FiraCode
+      google-fonts:
+        - Fira Sans
+  - type: script
+    snippets:
+      - authselect select local with-silent-lastlog with-fingerprint
+    scripts:
+      - install_vscode.sh
+      - install_cosmic_clipboard_applet.sh
+  - type: script

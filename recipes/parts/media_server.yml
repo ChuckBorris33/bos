@@ -1,0 +1,27 @@
+modules:
+  - type: files
+    files:
+      - source: media_server
+        destination: /
+  - type: justfiles
+    include:
+      - apps.just
+      - setup.just
+      - system.just
+      - media-server.just
+    validate: true
+  - type: brewfiles
+    source: local
+    include:
+      - default.Brewfile
+    validate: true
+  - type: default-flatpaks
+    configurations:
+      - scope: user
+        repo:
+          # you can override the title to make inclusion of both system and user repos clearer
+          title: Flathub (user)
+        install: []
+  - type: script
+    scripts:
+      - "install_steam.sh"

@@ -14,52 +14,15 @@ image-version: 43 # latest is also supported if you want new updates ASAP
 modules:
   - type: files
     files:
-      - source: system
-        destination: /
-  - type: files
-    files:
-      - source: media_server
+      - source: common
         destination: /
   - from-file: "parts/ublue.yml"
-  - from-file: "parts/packages.yml"
-  - from-file: "parts/media.yml"
-  - type: bootc-hooks
-    source: local
-    user:
-      boot:
-        - yadm_pull.sh
-  - type: first-time-setup
-    source: local
-    set_default_shell:
-      shell: zsh
-    clone_dotfiles:
-      repo: git@github.com:chuckborris33/dotfiles.git
-    install_flatpaks:
-      remotes:
-        - name: flathub
-          url: https://dl.flathub.org/repo/flathub.flatpakrepo
-          apps:
-    install_brew_packages:
-      formulae:
-        - fzf
-        - starship
-        - helix
-        - bat
-        - ripgrep
-        - fd
-        - eza
-        - zoxide
-        - tldr
-        - direnv
-        - zellij
-    configure_git_identity: true
-    setup_ssh_and_github: true
-    setup_tailscale: true
-    #setup_steam_kiosk: true
-    setup_media_services: true
+  - from-file: "parts/common_packages.yml"
+  - from-file: "parts/media_packages.yml"
+  - from-file: "parts/media_server.yml"
   - type: script
     scripts:
-      - "install_steam.sh"
-  - from-file: "parts/final.yml"
+      - removeunusedrepos.sh
+  - type: signing
   # Qadlet with filebrowser, jellyfin, tailscale, dnsmasq
   # Later seefile, vaultwarden, radarr, sonarr, lidarr

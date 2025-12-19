@@ -14,73 +14,13 @@ image-version: 43 # latest is also supported if you want new updates ASAP
 modules:
   - type: files
     files:
-      - source: system
-        destination: /
-      - source: cosmic
+      - source: common
         destination: /
   - from-file: "parts/ublue.yml"
-  - from-file: "parts/packages.yml"
-  - from-file: "parts/nvidia.yml"
-  - from-file: "parts/media.yml"
-  - type: dnf
-    repos:
-      cleanup: true
-      files:
-        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
-    install:
-      packages:
-        - libva-nvidia-driver
-        - zed
-        - openconnect
-
-  - type: bootc-hooks
-    source: local
-    user:
-      boot:
-        - yadm_pull.sh
-  - type: first-time-setup
-    source: local
-    set_default_shell:
-      shell: zsh
-    clone_dotfiles:
-      repo: git@github.com:chuckborris33/dotfiles.git
-    install_flatpaks:
-      remotes:
-        - name: flathub
-          url: https://dl.flathub.org/repo/flathub.flatpakrepo
-          apps:
-            - com.github.IsmaelMartinez.teams_for_linux
-            - com.spotify.Client
-            - io.beekeeperstudio.Studio
-            - io.github.betaflight.BetaflightConfigurator
-            - dev.edfloreshz.CosmicTweaks
-        - name: cosmic
-          url: "https://apt.pop-os.org/cosmic/cosmic.flatpakrepo"
-          apps: []
-    install_brew_packages:
-      formulae:
-        - fzf
-        - starship
-        - helix
-        - neovim
-        - bat
-        - ripgrep
-        - fd
-        - eza
-        - zoxide
-        - tldr
-        - fnm
-        - uv
-        - direnv
-        - zellij
-    configure_git_identity: true
-    copy_cosmic_config: true
-    setup_ssh_and_github: true
-    setup_tailscale: true
+  - from-file: "parts/common_packages.yml"
+  - from-file: "parts/media_packages.yml"
+  - from-file: "parts/workstation.yml"
   - type: script
-    snippets:
-      - authselect select local with-silent-lastlog with-fingerprint
     scripts:
-      - install_vscode.sh
-      - install_cosmic_clipboard_applet.sh
-  - from-file: "parts/final.yml"
+      - removeunusedrepos.sh
+  - type: signing
