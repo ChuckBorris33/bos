@@ -40,7 +40,8 @@ AddDevice=/dev/dri:/dev/dri
 
 # --- Restart Policy ---
 # Automatically restart the container if it fails.
-RestartPolicy=on-failure
+[Service]
+Restart=on-failure
 
 [Install]
 # Start this service automatically on boot

@@ -31,7 +31,8 @@ Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
 Volume=/opt/caddy/config:/config:Z
 Volume=/opt/caddy/data:/data:Z
 
-RestartPolicy=on-failure
+[Service]
+Restart=on-failure
 
 [Install]
 # Start this service automatically on boot

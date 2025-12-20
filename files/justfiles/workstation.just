@@ -32,6 +32,7 @@ setup-interactive:
     choices=$(gum choose --no-limit \
         "install-default-brew" \
         "install-default-flatpaks" \
+        "login-gh" \
         "clone-dotfiles" \
         "configure-git-identity" \
         "set-default-shell" \
