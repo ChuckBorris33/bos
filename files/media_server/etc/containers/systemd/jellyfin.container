@@ -36,11 +36,11 @@ Volume=/opt/jellyfin/cache:/cache:Z
 # --- Hardware Acceleration ---
 # Pass through the GPU for hardware transcoding (e.g., Intel QSV, AMD VAAPI).
 # This is for Intel/AMD. For NVIDIA, you might need different setup.
-Device=/dev/dri:/dev/dri
+AddDevice=/dev/dri:/dev/dri
 
 # --- Restart Policy ---
 # Automatically restart the container if it fails.
-Restart=on-failure
+RestartPolicy=on-failure
 
 [Install]
 # Start this service automatically on boot

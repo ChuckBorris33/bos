@@ -24,7 +24,7 @@ PublishPort=${MEDIA_SERVER_IP}:53:53/udp
 # Mount the configuration file.
 Volume=/opt/dnsmasq/dnsmasq.d:/etc/dnsmasq.d:Z
 
-Restart=on-failure
+RestartPolicy=on-failure
 
 [Install]
 WantedBy=multi-user.target

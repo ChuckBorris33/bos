@@ -141,6 +141,7 @@ setup-interactive:
     choices=$(gum choose --no-limit \
         "install-default-brew" \
         "install-default-flatpaks" \
+        "login-gh" \
         "clone-dotfiles" \
         "configure-git-identity" \
         "set-default-shell" \
@@ -151,3 +152,9 @@ setup-interactive:
     for choice in $choices; do
         ujust $choice
     done
+
+[group('Debug')]
+debug-quadlet:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    sudo /usr/lib/systemd/system-generators/podman-system-generator --dryrun

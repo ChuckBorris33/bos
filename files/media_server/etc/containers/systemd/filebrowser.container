@@ -25,7 +25,7 @@ PublishPort=127.0.0.1:8088:80
 Volume=/var/server_storage/media:/srv:Z
 Volume=/opt/filebrowser/database.db:/database.db:Z
 
-Restart=on-failure
+RestartPolicy=on-failure
 
 [Install]
 WantedBy=multi-user.target

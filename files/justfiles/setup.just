@@ -1,7 +1,32 @@
 [group('Setup')]
+login-gh:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Check if gh CLI is installed, if not, install it with brew
+    if ! command -v gh &> /dev/null; then
+        echo "GitHub CLI 'gh' not found."
+        if ! command -v brew &> /dev/null; then
+            echo "Error: Homebrew 'brew' is not installed. Cannot install 'gh'." >&2
+            exit 1
+        fi
+        echo "Installing GitHub CLI 'gh' with Homebrew..."
+        brew install gh
+    fi
+
+    # Check if user is logged into gh
+    if gh auth status &>/dev/null; then
+        echo "Already logged into GitHub."
+    else
+        echo "You are not logged into GitHub."
+        echo "Please follow the prompts to login."
+        gh auth login
+    fi
+
+[group('Setup')]
 clone-dotfiles:
     #!/usr/bin/env bash
-    DOTFILES_REPO="git@github.com:chuckborris33/dotfiles.git"
+    DOTFILES_REPO="https://github.com/ChuckBorris33/dotfiles.git"
 
     if [ -z "$DOTFILES_REPO" ] || [ "$DOTFILES_REPO" = "null" ]; then
         exit 0
