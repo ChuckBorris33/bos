@@ -23,7 +23,7 @@ PublishPort=127.0.0.1:8088:80
 
 # Mount the media directory to serve and a database file for persistence
 Volume=/var/server_storage/media:/srv:Z
-Volume=/opt/filebrowser/database.db:/database.db:Z
+Volume=/var/opt/filebrowser/database.db:/database.db:Z
 
 [Service]
 Restart=on-failure

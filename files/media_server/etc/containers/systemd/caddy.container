@@ -28,8 +28,8 @@ Network=host
 # Volumes for Caddyfile, configuration, and data.
 # The ":Z" at the end handles SELinux permissions.
 Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
-Volume=/opt/caddy/config:/config:Z
-Volume=/opt/caddy/data:/data:Z
+Volume=/var/opt/caddy/config:/config:Z
+Volume=/var/opt/caddy/data:/data:Z
 
 [Service]
 Restart=on-failure

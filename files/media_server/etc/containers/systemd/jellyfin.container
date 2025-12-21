@@ -30,8 +30,8 @@ PublishPort=127.0.0.1:8096:8096/tcp
 Volume=/var/server_storage/media:/media:Z
 
 # Persist configuration and cache on the host machine
-Volume=/opt/jellyfin/config:/config:Z
-Volume=/opt/jellyfin/cache:/cache:Z
+Volume=/var/opt/jellyfin/config:/config:Z
+Volume=/var/opt/jellyfin/cache:/cache:Z
 
 # --- Hardware Acceleration ---
 # Pass through the GPU for hardware transcoding (e.g., Intel QSV, AMD VAAPI).

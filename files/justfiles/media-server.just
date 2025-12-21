@@ -12,33 +12,33 @@ setup-media-services:
     echo "This will configure Jellyfin, Caddy, and other media services."
 
     echo "Initializing Caddy user and directories..."
-    mkdir -p /opt/caddy/config /opt/caddy/data
+    mkdir -p /var/opt/caddy/config /var/opt/caddy/data
     if ! getent group caddy >/dev/null; then groupadd --system --gid 82 caddy; fi
     if ! getent passwd caddy >/dev/null; then useradd --system --gid caddy --uid 82 --no-create-home --shell /bin/false caddy; fi
-    chown -R caddy:caddy /opt/caddy
+    chown -R caddy:caddy /var/opt/caddy
 
     echo "Initializing dnsmasq user and directories..."
-    mkdir -p /opt/dnsmasq/dnsmasq.d
+    mkdir -p /var/opt/dnsmasq/dnsmasq.d
     if ! getent group dnsmasq >/dev/null; then groupadd --system --gid 99 dnsmasq; fi
     if ! getent passwd dnsmasq >/dev/null; then useradd --system --gid dnsmasq --uid 99 --no-create-home --shell /bin/false dnsmasq; fi
-    chown -R dnsmasq:dnsmasq /opt/dnsmasq
+    chown -R dnsmasq:dnsmasq /var/opt/dnsmasq
 
     echo "Initializing Jellyfin user and directories..."
-    mkdir -p /opt/jellyfin/config /opt/jellyfin/cache
+    mkdir -p /var/opt/jellyfin/config /var/opt/jellyfin/cache
     if ! getent group jellyfin >/dev/null; then groupadd --system --gid 1000 jellyfin; fi
     if ! getent passwd jellyfin >/dev/null; then useradd --system --gid jellyfin --uid 1000 --no-create-home --shell /bin/false jellyfin; fi
-    chown -R jellyfin:jellyfin /opt/jellyfin
+    chown -R jellyfin:jellyfin /var/opt/jellyfin
     if [ -f /etc/jellyfin/authentication.xml ]; then
-        cp /etc/jellyfin/authentication.xml /opt/jellyfin/config/authentication.xml
-        chown jellyfin:jellyfin /opt/jellyfin/config/authentication.xml
+        cp /etc/jellyfin/authentication.xml /var/opt/jellyfin/config/authentication.xml
+        chown jellyfin:jellyfin /var/opt/jellyfin/config/authentication.xml
     fi
 
     echo "Initializing File Browser user and directories..."
-    mkdir -p /opt/filebrowser
-    touch /opt/filebrowser/database.db
+    mkdir -p /var/opt/filebrowser
+    touch /var/opt/filebrowser/database.db
     if ! getent group filebrowser >/dev/null; then groupadd --system --gid 1001 filebrowser; fi
     if ! getent passwd filebrowser >/dev/null; then useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
-    chown -R filebrowser:filebrowser /opt/filebrowser
+    chown -R filebrowser:filebrowser /var/opt/filebrowser
 
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
