@@ -12,63 +12,59 @@ setup-media-services:
     echo "This will configure Jellyfin, Caddy, and other media services."
 
     echo "Initializing Caddy user and directories..."
-    mkdir -p /var/opt/caddy/config /var/opt/caddy/data
-    if ! getent group caddy >/dev/null; then groupadd --system --gid 82 caddy; fi
-    if ! getent passwd caddy >/dev/null; then useradd --system --gid caddy --uid 82 --no-create-home --shell /bin/false caddy; fi
-    chown -R caddy:caddy /var/opt/caddy
+    sudo mkdir -p /var/opt/caddy/config /var/opt/caddy/data
+    if ! getent group caddy >/dev/null; then sudo groupadd --system --gid 82 caddy; fi
+    if ! getent passwd caddy >/dev/null; then sudo useradd --system --gid caddy --uid 82 --no-create-home --shell /bin/false caddy; fi
+    sudo chown -R caddy:caddy /var/opt/caddy
 
     echo "Initializing dnsmasq user and directories..."
-    mkdir -p /var/opt/dnsmasq/dnsmasq.d
-    if ! getent group dnsmasq >/dev/null; then groupadd --system --gid 99 dnsmasq; fi
-    if ! getent passwd dnsmasq >/dev/null; then useradd --system --gid dnsmasq --uid 99 --no-create-home --shell /bin/false dnsmasq; fi
-    chown -R dnsmasq:dnsmasq /var/opt/dnsmasq
+    sudo mkdir -p /var/opt/dnsmasq/dnsmasq.d
+    sudo touch /var/opt/dnsmasq/dnsmasq.custom
+    if ! getent group dnsmasq >/dev/null; then sudo groupadd --system --gid 99 dnsmasq; fi
+    if ! getent passwd dnsmasq >/dev/null; then sudo useradd --system --gid dnsmasq --uid 99 --no-create-home --shell /bin/false dnsmasq; fi
+    sudo chown -R dnsmasq:dnsmasq /var/opt/dnsmasq
 
     echo "Initializing Jellyfin user and directories..."
-    mkdir -p /var/opt/jellyfin/config /var/opt/jellyfin/cache
-    if ! getent group jellyfin >/dev/null; then groupadd --system --gid 1000 jellyfin; fi
-    if ! getent passwd jellyfin >/dev/null; then useradd --system --gid jellyfin --uid 1000 --no-create-home --shell /bin/false jellyfin; fi
-    chown -R jellyfin:jellyfin /var/opt/jellyfin
+    sudo mkdir -p /var/opt/jellyfin/config /var/opt/jellyfin/cache
+    if ! getent group jellyfin >/dev/null; then sudo groupadd --system --gid 1002 jellyfin; fi
+    if ! getent passwd jellyfin >/dev/null; then sudo useradd --system --gid jellyfin --uid 1002 --yes-create-home --shell /bin/false jellyfin; fi
+    sudo chown -R jellyfin:jellyfin /var/opt/jellyfin
     if [ -f /etc/jellyfin/authentication.xml ]; then
-        cp /etc/jellyfin/authentication.xml /var/opt/jellyfin/config/authentication.xml
-        chown jellyfin:jellyfin /var/opt/jellyfin/config/authentication.xml
+        sudo cp /etc/jellyfin/authentication.xml /var/opt/jellyfin/config/authentication.xml
+        sudo chown jellyfin:jellyfin /var/opt/jellyfin/config/authentication.xml
     fi
 
     echo "Initializing File Browser user and directories..."
-    mkdir -p /var/opt/filebrowser
-    touch /var/opt/filebrowser/database.db
-    if ! getent group filebrowser >/dev/null; then groupadd --system --gid 1001 filebrowser; fi
-    if ! getent passwd filebrowser >/dev/null; then useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
-    chown -R filebrowser:filebrowser /var/opt/filebrowser
+    sudo mkdir -p /var/opt/filebrowser
+    sudo mkdir -p /var/opt/filebrowser/config
+    sudo touch /var/opt/filebrowser/database.db
+    if ! getent group filebrowser >/dev/null; then sudo groupadd --system --gid 1001 filebrowser; fi
+    if ! getent passwd filebrowser >/dev/null; then sudo useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
+    sudo chown -R filebrowser:filebrowser /var/opt/filebrowser
 
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
-        btrfs subvolume create /var/server_storage
+        sudo btrfs subvolume create /var/server_storage
     fi
 
     echo "Creating storage directories..."
-    mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
+    sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
 
     echo "Setting permissions for storage directories..."
     # Add filebrowser user to the primary group of each service to grant access
-    usermod -aG jellyfin filebrowser
-    usermod -aG steam filebrowser
+    sudo usermod -aG jellyfin filebrowser
+    #sudo usermod -aG steam filebrowser
 
     # Set ownership and permissions for each service directory
-    chown -R jellyfin:jellyfin /var/server_storage/media
-    chmod -R u=rwX,g=rwX,o=rX /var/server_storage/media
+    sudo chown -R jellyfin:jellyfin /var/server_storage/media
+    sudo chmod -R u=rwX,g=rwX,o=rX /var/server_storage/media
 
-    chown -R steam:steam /var/server_storage/games
-    chmod -R u=rwX,g=rwX,o=rX /var/server_storage/games
-    chmod -R u=rwX,g=rwX,o=rX /var/server_storage/downloads
+    #sudo chown -R steam:steam /var/server_storage/games
+    sudo chmod -R u=rwX,g=rwX,o=rX /var/server_storage/games
+    sudo chmod -R u=rwX,g=rwX,o=rX /var/server_storage/downloads
 
     echo "Reloading systemd and enabling media services..."
-    systemctl daemon-reload
-    systemctl enable --now media-config-subst.service
-    systemctl enable --now caddy.service
-    systemctl enable --now dnsmasq.service
-    systemctl enable --now jellyfin.service
-    systemctl enable --now filebrowser.service
-
+    sudo systemctl daemon-reload
     echo "Media services setup complete!"
 
 [group('Setup')]
@@ -80,9 +76,9 @@ setup-steam-kiosk:
 
     if ! id "$KIOSK_USER" &>/dev/null; then
         echo "Creating user '$KIOSK_USER'..."
-        useradd -m "$KIOSK_USER"
+        sudo useradd -m "$KIOSK_USER"
         echo "Setting empty password for '$KIOSK_USER'..."
-        passwd -d "$KIOSK_USER"
+        sudo passwd -d "$KIOSK_USER"
     else
         echo "User '$KIOSK_USER' already exists. Skipping creation."
     fi
@@ -92,8 +88,8 @@ setup-steam-kiosk:
         echo "Autologin already configured. Skipping."
     else
         echo "Configuring autologin for user '$KIOSK_USER'..."
-        mkdir -p "$(dirname "$autologin_conf")"
-        echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin $KIOSK_USER --noclear %I \$TERM\nType=idle" > "$autologin_conf"
+        sudo mkdir -p "$(dirname "$autologin_conf")"
+        echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin $KIOSK_USER --noclear %I \$TERM\nType=idle" | sudo tee "$autologin_conf" > /dev/null
     fi
 
     KIOSK_SCRIPT="/home/$KIOSK_USER/start_steam_kiosk.sh"
@@ -101,10 +97,10 @@ setup-steam-kiosk:
         echo "Kiosk launch script already exists. Skipping."
     else
         echo "Creating Steam launch script..."
-        mkdir -p "/home/$KIOSK_USER/"
-        echo "IyEvYmluL2Jhc2gKIyBTdGFydHMgYSBHYW1lc2NvcGUgc2Vzc2lvbiB3aXRoIFN0ZWFtIGluIEJpZyBQaWN0dXJlIG1vZGUgb24gVFRZMS4KCmlmIHRlc3QgIiQodHR5KSIgIT0gIi9kZXYvdHR5MSI7IHRoZW4KICAgIGV4aXQgMApmaQoKZ2FtZXNjb3BlIC1lIC1mIC0tIC91c3IvYmluL3N0ZWFtIC1iaWdwaWN0dXJlCg==" | base64 -d > "$KIOSK_SCRIPT"
-        chmod +x "$KIOSK_SCRIPT"
-        chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
+        sudo mkdir -p "/home/$KIOSK_USER/"
+        echo "IyEvYmluL2Jhc2gKIyBTdGFydHMgYSBHYW1lc2NvcGUgc2Vzc2lvbiB3aXRoIFN0ZWFtIGluIEJpZyBQaWN0dXJlIG1vZGUgb24gVFRZMS4KCmlmIHRlc3QgIiQodHR5KSIgIT0gIi9kZXYvdHR5MSI7IHRoZW4KICAgIGV4aXQgMApmaQoKZ2FtZXNjb3BlIC1lIC1mIC0tIC91c3IvYmluL3N0ZWFtIC1iaWdwaWN0dXJlCg==" | sudo base64 -d > "$KIOSK_SCRIPT"
+        sudo chmod +x "$KIOSK_SCRIPT"
+        sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
     fi
 
     PROFILE_FILE="/home/$KIOSK_USER/.bash_profile"
@@ -112,12 +108,12 @@ setup-steam-kiosk:
         echo "User profile already configured. Skipping."
     else
         echo "Configuring user profile for kiosk mode..."
-        echo "" >> "$PROFILE_FILE"
-        echo "# If running on tty1, and no X session is running, start Steam kiosk mode." >> "$PROFILE_FILE"
-        echo 'if [ -z "$DISPLAY" ] && [ "	$(tty)" == "/dev/tty1" ]; then' >> "$PROFILE_FILE"
-        echo "  exec $KIOSK_SCRIPT" >> "$PROFILE_FILE"
-        echo "fi" >> "$PROFILE_FILE"
-        chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
+        echo "" | sudo tee -a "$PROFILE_FILE" > /dev/null
+        echo "# If running on tty1, and no X session is running, start Steam kiosk mode." | sudo tee -a "$PROFILE_FILE" > /dev/null
+        echo 'if [ -z "$DISPLAY" ] && [ "	$(tty)" == "/dev/tty1" ]; then' | sudo tee -a "$PROFILE_FILE" > /dev/null
+        echo "  exec $KIOSK_SCRIPT" | sudo tee -a "$PROFILE_FILE" > /dev/null
+        echo "fi" | sudo tee -a "$PROFILE_FILE" > /dev/null
+        sudo chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
     fi
 
     echo "Steam Kiosk setup complete!"

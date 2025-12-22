@@ -7,8 +7,8 @@
 [Unit]
 Description=Substitute variables in media config files
 # Run after tailscale is up to ensure we can get an IP.
-Requires=tailscale.service
-After=tailscale.service
+Requires=tailscaled.service
+After=tailscaled.service
 # Run before the services that need the generated configs.
 Before=caddy.service dnsmasq.service
 
