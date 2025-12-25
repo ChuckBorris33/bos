@@ -14,16 +14,14 @@ Wants=network-online.target
 [Container]
 Image=docker.io/dockurr/dnsmasq:latest
 ContainerName=dnsmasq
-User=99
 AddCapability=CAP_NET_BIND_SERVICE
 
 # Publish DNS port 53 on both TCP and UDP, only on the specified IP.
 PublishPort=${MEDIA_SERVER_IP}:53:53/tcp
 PublishPort=${MEDIA_SERVER_IP}:53:53/udp
 
-# Mount the configuration file.
-Volume=/var/opt/dnsmasq/dnsmasq.d:/etc/dnsmasq.d:Z
-Volume=/var/opt/dnsmasq/dnsmasq.custom:/etc/dnsmasq.custom:Z
+# Mount the configuration directory.
+Volume=/opt/dnsmasq/dnsmasq.d:/etc/dnsmasq.d:z
 
 [Service]
 Restart=on-failure
