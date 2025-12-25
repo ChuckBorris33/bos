@@ -12,6 +12,7 @@ modules:
       packages:
         - zed
         - openconnect
+        - alacritty
   - type: justfiles
     include:
       - apps.just
