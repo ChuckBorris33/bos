@@ -10,7 +10,6 @@ modules:
         # Terminal
         - zsh
         - yadm
-        - alacritty
         - gum
         # Devel
         - distrobox

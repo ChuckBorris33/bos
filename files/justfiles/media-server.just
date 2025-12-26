@@ -37,7 +37,7 @@ setup-media-services:
     echo "Initializing File Browser user and directories..."
     sudo mkdir -p /var/opt/filebrowser
     sudo mkdir -p /var/opt/filebrowser/config
-    sudo touch /var/opt/filebrowser/database.db
+    sudo mkdir -p /var/opt/filebrowser/database
     if ! getent group filebrowser >/dev/null; then sudo groupadd --system --gid 1001 filebrowser; fi
     if ! getent passwd filebrowser >/dev/null; then sudo useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
     sudo chown -R filebrowser:filebrowser /var/opt/filebrowser
@@ -46,6 +46,7 @@ setup-media-services:
         echo "Creating Btrfs subvolume at /var/server_storage..."
         sudo btrfs subvolume create /var/server_storage
     fi
+    sudo chown -R filebrowser:filebrowser /var/server_storage
 
     echo "Creating storage directories..."
     sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
