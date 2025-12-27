@@ -7,7 +7,7 @@
 
 export CADDY_SERVICES="
 # --- HTTPS site with path-based routing ---
-bosm.ancon-mimosa.ts.net {
+home.ancon-mimosa.ts.net {
     bind ${MEDIA_SERVER_IP}
 
     # Jellyfin
@@ -16,19 +16,19 @@ bosm.ancon-mimosa.ts.net {
     }
 
     # Fsync
-    handle_path /fsync* {
+    handle_path /files* {
         reverse_proxy localhost:8000
     }
 }
 
 # --- HTTP redirects for old .home names ---
 http://media.home {
-    redir https://bosm.ancon-mimosa.ts.net/media{uri}
+    redir https://home.ancon-mimosa.ts.net/media{uri}
 }
 
-http://fsync.home {
-    redir https://bosm.ancon-mimosa.ts.net/fsync{uri}
+http://files.home {
+    redir https://home.ancon-mimosa.ts.net/files{uri}
 }
 "
 
-export DNSMASQ_DOMAINS="media.home fsync.home"
+export DNSMASQ_DOMAINS="media.home files.home"

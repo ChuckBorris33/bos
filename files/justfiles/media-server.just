@@ -3,11 +3,6 @@ setup-media-services:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    if [ -d "/var/server_storage" ] && systemctl is-active --quiet caddy.service; then
-        echo "Media services are already configured. Skipping."
-        exit 0
-    fi
-
     echo "Setting up media services..."
     echo "This will configure Jellyfin, Caddy, and other media services."
 
@@ -46,26 +41,27 @@ setup-media-services:
         echo "Creating Btrfs subvolume at /var/server_storage..."
         sudo btrfs subvolume create /var/server_storage
     fi
-    sudo chown -R filebrowser:filebrowser /var/server_storage
 
     echo "Creating storage directories..."
     sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
 
+    echo "Initializing serverstorage group..."
+    if ! getent group serverstorage >/dev/null; then sudo groupadd --system --gid 1003 serverstorage; fi
+
+    echo "Adding users to serverstorage group..."
+    sudo usermod -aG serverstorage jellyfin
+    sudo usermod -aG serverstorage filebrowser
+
     echo "Setting permissions for storage directories..."
-    # Add filebrowser user to the primary group of each service to grant access
-    sudo usermod -aG jellyfin filebrowser
-    #sudo usermod -aG steam filebrowser
+    sudo chown -R filebrowser:serverstorage /var/server_storage
+    sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage
 
-    # Set ownership and permissions for each service directory
-    sudo chown -R jellyfin:jellyfin /var/server_storage/media
-    sudo chmod -R u=rwX,g=rwX,o=rX /var/server_storage/media
-
-    #sudo chown -R steam:steam /var/server_storage/games
-    sudo chmod -R u=rwX,g=rwX,o=rX /var/server_storage/games
-    sudo chmod -R u=rwX,g=rwX,o=rX /var/server_storage/downloads
-
-    echo "Reloading systemd and enabling media services..."
+    echo "Reloading systemd and restarting media services..."
+    sudo systemctl start media-config-subst.service
     sudo systemctl daemon-reload
+    sudo systemctl restart caddy.service || true
+    sudo systemctl restart jellyfin.service || true
+    sudo systemctl restart filebrowser.service || true
     echo "Media services setup complete!"
 
 [group('Setup')]

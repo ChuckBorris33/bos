@@ -30,8 +30,4 @@ for domain in ${DNSMASQ_DOMAINS}; do
   echo "address=/${domain}/${MEDIA_SERVER_IP}" >> "${DNSMASQ_CONF_PATH}"
 done
 
-echo "Generating dnsmasq container config..."
-mkdir -p /etc/containers/systemd
-envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.container
-
 echo "Configuration generation complete."

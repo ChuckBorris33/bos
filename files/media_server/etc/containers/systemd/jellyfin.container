@@ -27,7 +27,7 @@ PublishPort=127.0.0.1:8096:8096/tcp
 # --- Volumes ---
 # Mount the media directory.
 # The ":Z" at the end handles SELinux permissions.
-Volume=/var/server_storage/media:/media:Z
+Volume=/var/server_storage/media:/media:z
 
 # Persist configuration and cache on the host machine
 Volume=/var/opt/jellyfin/config:/config:Z
