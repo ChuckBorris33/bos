@@ -1,0 +1,27 @@
+# /etc/containers/systemd/beszel.container
+#
+# This Quadlet file runs Beszel server monitoring as a systemd service.
+
+[Unit]
+Description=Beszel Server Monitoring
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=ghcr.io/getbeszel/beszel:latest
+ContainerName=beszel
+
+PublishPort=127.0.0.1:8000:8000
+
+# Mount Podman socket to read container stats
+# Beszel expects docker.sock, so we map the podman socket to that path.
+Volume=/run/podman/podman.sock:/var/run/docker.sock:ro
+
+# Volume for persistent data
+Volume=/var/opt/beszel/data:/data:Z
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

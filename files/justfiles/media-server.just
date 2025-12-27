@@ -37,6 +37,9 @@ setup-media-services:
     if ! getent passwd filebrowser >/dev/null; then sudo useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
     sudo chown -R filebrowser:filebrowser /var/opt/filebrowser
 
+    echo "Initializing Beszel directories..."
+    sudo mkdir -p /var/opt/beszel/data
+
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
         sudo btrfs subvolume create /var/server_storage
@@ -62,6 +65,7 @@ setup-media-services:
     sudo systemctl restart caddy.service || true
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
+    sudo systemctl restart beszel.service || true
     echo "Media services setup complete!"
 
 [group('Setup')]
