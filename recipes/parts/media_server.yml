@@ -1,4 +1,8 @@
 modules:
+  - type: dnf
+    install:
+      packages:
+        - tini
   - type: files
     files:
       - source: media_server
