@@ -13,10 +13,6 @@ ContainerName=beszel
 
 PublishPort=0.0.0.0:8090:8090
 
-# Mount Podman socket to read container stats
-# Beszel expects docker.sock, so we map the podman socket to that path.
-Volume=/run/podman/podman.sock:/var/run/docker.sock:ro,z
-
 # Volume for persistent data
 Volume=/var/opt/beszel/data:/data:Z
 

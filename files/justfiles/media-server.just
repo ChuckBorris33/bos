@@ -40,6 +40,9 @@ setup-media-services:
     echo "Initializing Beszel directories..."
     sudo mkdir -p /var/opt/beszel/data
 
+    echo "Initializing Beszel Agent directories..."
+    sudo mkdir -p /var/opt/beszel-agent/data
+
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
         sudo btrfs subvolume create /var/server_storage
@@ -78,6 +81,7 @@ restart-media-services:
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
+    sudo systemctl restart beszel-agent.service || true
     echo "Media services restarted!"
 
 [group('Setup')]
