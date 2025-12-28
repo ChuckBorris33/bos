@@ -11,11 +11,11 @@ Wants=network-online.target
 Image=ghcr.io/getbeszel/beszel:latest
 ContainerName=beszel
 
-PublishPort=127.0.0.1:8000:8000
+PublishPort=0.0.0.0:8090:8090
 
 # Mount Podman socket to read container stats
 # Beszel expects docker.sock, so we map the podman socket to that path.
-Volume=/run/podman/podman.sock:/var/run/docker.sock:ro
+Volume=/run/podman/podman.sock:/var/run/docker.sock:ro,z
 
 # Volume for persistent data
 Volume=/var/opt/beszel/data:/data:Z

@@ -55,18 +55,30 @@ setup-media-services:
     sudo usermod -aG serverstorage jellyfin
     sudo usermod -aG serverstorage filebrowser
 
+    echo "Adding caddy user to tailscale group..."
+    sudo usermod -aG tailscale caddy
+
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
     sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage
 
-    echo "Reloading systemd and restarting media services..."
+    ujust restart-media-services
+    echo "Media services setup complete!"
+
+
+[group('Debug')]
+restart-media-services:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Restarting media services..."
     sudo systemctl start media-config-subst.service
     sudo systemctl daemon-reload
     sudo systemctl restart caddy.service || true
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
-    echo "Media services setup complete!"
+    echo "Media services restarted!"
 
 [group('Setup')]
 setup-steam-kiosk:

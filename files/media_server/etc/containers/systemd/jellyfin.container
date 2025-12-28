@@ -19,7 +19,7 @@ Description=Jellyfin Media Server
 # Use the official Jellyfin image
 Image=docker.io/jellyfin/jellyfin:latest
 ContainerName=jellyfin
-User=1002
+User=1002:1003
 
 # Expose the web UI port only on the host's loopback interface
 PublishPort=127.0.0.1:8096:8096/tcp

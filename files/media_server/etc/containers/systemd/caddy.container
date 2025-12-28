@@ -26,7 +26,7 @@ User=82
 Network=host
 
 # Volume for Tailscale socket to enable automatic HTTPS for *.ts.net domains
-# Volume=/var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock:ro
+Volume=/var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock:ro,z
 
 # Volumes for Caddyfile, configuration, and data.
 # The ":Z" at the end handles SELinux permissions.
