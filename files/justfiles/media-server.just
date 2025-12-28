@@ -68,12 +68,10 @@ setup-media-services:
     ujust restart-media-services
     echo "Media services setup complete!"
 
-
 [group('Debug')]
 restart-media-services:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Restarting media services..."
     sudo systemctl start media-config-subst.service
     sudo systemctl daemon-reload
