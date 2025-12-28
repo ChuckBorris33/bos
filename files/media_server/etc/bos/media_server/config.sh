@@ -8,7 +8,6 @@
 export CADDY_SERVICES="
 # --- HTTPS site with path-based routing ---
 home.ancon-mimosa.ts.net {
-    bind ${MEDIA_SERVER_IP}
 
     # Jellyfin
     handle_path /media* {
@@ -17,7 +16,7 @@ home.ancon-mimosa.ts.net {
 
     # Fsync
     handle_path /files* {
-        reverse_proxy localhost:8000
+        reverse_proxy localhost:8088
     }
 }
 

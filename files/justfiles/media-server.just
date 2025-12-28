@@ -58,9 +58,6 @@ setup-media-services:
     sudo usermod -aG serverstorage jellyfin
     sudo usermod -aG serverstorage filebrowser
 
-    echo "Adding caddy user to tailscale group..."
-    sudo usermod -aG tailscale caddy
-
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
     sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage
