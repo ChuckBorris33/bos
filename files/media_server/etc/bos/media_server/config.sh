@@ -21,13 +21,17 @@ home.ancon-mimosa.ts.net {
 }
 
 # --- HTTP redirects for old .home names ---
-http://media.home {
-    redir https://home.ancon-mimosa.ts.net/media{uri}
+http://media.home, http://www.media.home {
+    reverse_proxy localhost:8096
 }
 
-http://files.home {
-    redir https://home.ancon-mimosa.ts.net/files{uri}
+http://files.home, http://www.files.home {
+    reverse_proxy localhost:8088
+}
+
+http://dash.home, http://www.dash.home {
+    reverse_proxy localhost:8090
 }
 "
 
-export DNSMASQ_DOMAINS="media.home files.home"
+export DNSMASQ_DOMAINS="media.home files.home dash.home"

@@ -14,7 +14,7 @@ ContainerName=beszel
 PublishPort=0.0.0.0:8090:8090
 
 # Volume for persistent data
-Volume=/var/opt/beszel/data:/data:Z
+Volume=/var/opt/beszel/data:/beszel_data:Z
 
 [Service]
 Restart=on-failure

@@ -19,7 +19,6 @@ Wants=network-online.target
 [Container]
 ContainerName=caddy
 Image=docker.io/library/caddy:latest
-User=82
 
 # Use host networking to allow Caddy to proxy to other containers
 # that have published ports on the host.
