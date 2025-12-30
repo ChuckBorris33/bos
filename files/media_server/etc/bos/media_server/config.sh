@@ -36,6 +36,10 @@ http://dash.home, http://www.dash.home {
 http://homepage.home, http://www.homepage.home {
     reverse_proxy localhost:3000
 }
+
+http://downloads.home, http://www.downloads.home {
+    reverse_proxy localhost:8089
+}
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home homepage.home"
+export DNSMASQ_DOMAINS="media.home files.home dash.home homepage.home downloads.home"
