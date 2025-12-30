@@ -30,4 +30,8 @@ for domain in ${DNSMASQ_DOMAINS}; do
   echo "address=/${domain}/${MEDIA_SERVER_IP}" >> "${DNSMASQ_CONF_PATH}"
 done
 
+echo "Copying Quadlet container files..."
+mkdir -p /etc/containers/systemd
+cp "${TPL_DIR}"/*.container /etc/containers/systemd/
+
 echo "Configuration generation complete."
