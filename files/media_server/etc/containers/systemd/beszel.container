@@ -10,11 +10,14 @@ Wants=network-online.target
 [Container]
 Image=ghcr.io/getbeszel/beszel:latest
 ContainerName=beszel
-
 PublishPort=0.0.0.0:8090:8090
+Environment=AUTO_LOGIN=admin@dash.home
+Environment=USER_EMAIL=admin@dash.home
+Environment=USER_PASSWORD=admin
+User=1004
 
 # Volume for persistent data
-Volume=/var/opt/beszel/data:/beszel_data:Z
+Volume=/var/opt/beszel/data:/beszel_data:z
 
 [Service]
 Restart=on-failure

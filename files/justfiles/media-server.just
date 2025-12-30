@@ -37,11 +37,11 @@ setup-media-services:
     if ! getent passwd filebrowser >/dev/null; then sudo useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
     sudo chown -R filebrowser:filebrowser /var/opt/filebrowser
 
-    echo "Initializing Beszel directories..."
+    echo "Initializing Beszel user and directories..."
     sudo mkdir -p /var/opt/beszel/data
-
-    echo "Initializing Beszel Agent directories..."
-    sudo mkdir -p /var/opt/beszel-agent/data
+    if ! getent group beszel >/dev/null; then sudo groupadd --system --gid 1004 beszel; fi
+    if ! getent passwd beszel >/dev/null; then sudo useradd --system --gid beszel --uid 1004 --no-create-home --shell /bin/false beszel; fi
+    sudo chown -R beszel:beszel /var/opt/beszel
 
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
@@ -72,11 +72,11 @@ restart-media-services:
     echo "Restarting media services..."
     sudo systemctl start media-config-subst.service
     sudo systemctl daemon-reload
+    sudo systemctl restart dnsmasq.service || true
     sudo systemctl restart caddy.service || true
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
-    sudo systemctl restart beszel-agent.service || true
     echo "Media services restarted!"
 
 [group('Setup')]
