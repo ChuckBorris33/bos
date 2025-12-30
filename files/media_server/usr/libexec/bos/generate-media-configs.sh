@@ -34,4 +34,14 @@ echo "Copying Quadlet container files..."
 mkdir -p /etc/containers/systemd
 cp "${TPL_DIR}"/*.container /etc/containers/systemd/
 
+echo "Copying Homepage config files..."
+HP_CONFIG_SRC="/etc/bos/homepage_config"
+HP_CONFIG_DST="/var/opt/homepage/config"
+if [ -d "${HP_CONFIG_SRC}" ]; then
+  echo "Found homepage config source at ${HP_CONFIG_SRC}, copying to ${HP_CONFIG_DST}"
+  mkdir -p "${HP_CONFIG_DST}"
+  # Use cp -a to preserve file attributes and copy recursively
+  cp -a "${HP_CONFIG_SRC}"/. "${HP_CONFIG_DST}"/
+fi
+
 echo "Configuration generation complete."

@@ -1,0 +1,25 @@
+- Media:
+    - jellyfin:
+        icon: mdi-jellyfin
+        href: http://media.home/
+        description: Stream your media
+        widget:
+          type: jellyfin
+          url: http://jellyfin:8096
+          key: # Add your Jellyfin API Key here
+
+- Monitoring:
+    - beszel:
+        icon: mdi-monitor-dashboard
+        href: http://dash.home/
+        description: Server status dashboard
+        widget:
+          type: beszel
+          url: http://beszel:8090
+          key: # Add your Beszel API Key here
+
+- Tools:
+    - filebrowser:
+        icon: mdi-folder-open
+        href: http://files.home/
+        description: Browse server files

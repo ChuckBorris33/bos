@@ -43,6 +43,12 @@ setup-media-services:
     if ! getent passwd beszel >/dev/null; then sudo useradd --system --gid beszel --uid 1004 --no-create-home --shell /bin/false beszel; fi
     sudo chown -R beszel:beszel /var/opt/beszel
 
+    echo "Initializing Homepage user and directories..."
+    sudo mkdir -p /var/opt/homepage/config
+    if ! getent group homepage >/dev/null; then sudo groupadd --system --gid 1005 homepage; fi
+    if ! getent passwd homepage >/dev/null; then sudo useradd --system --gid homepage --uid 1005 --no-create-home --shell /bin/false homepage; fi
+    sudo chown -R homepage:homepage /var/opt/homepage
+
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
         sudo btrfs subvolume create /var/server_storage
@@ -77,6 +83,7 @@ restart-media-services:
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
+    sudo systemctl restart homepage.service || true
     echo "Media services restarted!"
 
 [group('Setup')]
