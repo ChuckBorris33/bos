@@ -14,7 +14,6 @@ PublishPort=0.0.0.0:8090:8090
 Environment=AUTO_LOGIN=admin@dash.home
 Environment=USER_EMAIL=admin@dash.home
 Environment=USER_PASSWORD=admin9876
-Environment=SERVICE_PATTERNS=beszel*,dnsmasq*,filebrowser*,jellyfin*,caddy*,tailscale*,firewall*,sshd*
 
 # Volume for persistent data
 Volume=/var/opt/beszel/data:/beszel_data:Z

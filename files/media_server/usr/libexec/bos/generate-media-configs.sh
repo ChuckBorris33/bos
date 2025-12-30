@@ -32,6 +32,9 @@ done
 
 echo "Copying Quadlet container files..."
 mkdir -p /etc/containers/systemd
+# dnsmasq is a template, so we substitute the IP address
+envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.container
+# copy the rest of the container files
 cp "${TPL_DIR}"/*.container /etc/containers/systemd/
 
 echo "Copying Homepage config files..."
@@ -42,6 +45,18 @@ if [ -d "${HP_CONFIG_SRC}" ]; then
   mkdir -p "${HP_CONFIG_DST}"
   # Use cp -a to preserve file attributes and copy recursively
   cp -a "${HP_CONFIG_SRC}"/. "${HP_CONFIG_DST}"/
+fi
+
+echo "Configuring Beszel Agent if present..."
+AGENT_SERVICE_FILE="/etc/systemd/system/beszel-agent.service"
+if [ -f "${AGENT_SERVICE_FILE}" ]; then
+  echo "Found beszel-agent.service, configuring service patterns..."
+  AGENT_OVERRIDE_DIR="${AGENT_SERVICE_FILE}.d"
+  mkdir -p "${AGENT_OVERRIDE_DIR}"
+  cat > "${AGENT_OVERRIDE_DIR}/10-service-patterns.conf" <<EOF
+[Service]
+Environment="SERVICE_PATTERNS=beszel*,dnsmasq*,filebrowser*,jellyfin*,caddy*,homepage*,tailscale*,firewall*,sshd*"
+EOF
 fi
 
 echo "Configuration generation complete."

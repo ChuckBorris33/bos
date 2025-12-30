@@ -17,8 +17,8 @@ ContainerName=dnsmasq
 AddCapability=CAP_NET_BIND_SERVICE
 
 # Publish DNS port 53 on both TCP and UDP.
-PublishPort=53:53/tcp
-PublishPort=53:53/udp
+PublishPort=${MEDIA_SERVER_IP}:53:53/tcp
+PublishPort=${MEDIA_SERVER_IP}:53:53/udp
 
 # Mount the configuration directory.
 Volume=/opt/dnsmasq/dnsmasq.d:/etc/dnsmasq.d:z
