@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="sk">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Server Dashboard</title>
+        <style>
+            :root {
+                --background-color: #121212;
+                --card-background-color: #1e1e1e;
+                --text-color: #e0e0e0;
+                --primary-color: #bb86fc;
+                --button-text-color: #121212;
+                --card-border-color: #2a2a2a;
+                --card-shadow-color: rgba(0, 0, 0, 0.2);
+            }
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Helvetica, Arial, sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                margin: 0;
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            h1 {
+                color: var(--primary-color);
+                margin-bottom: 2rem;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 2rem;
+                width: 100%;
+                max-width: 1200px;
+            }
+            .card {
+                background-color: var(--card-background-color);
+                border-radius: 12px;
+                padding: 1.5rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                border: 1px solid var(--card-border-color);
+                box-shadow: 0 4px 12px var(--card-shadow-color);
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 24px var(--card-shadow-color);
+            }
+            .card-icon {
+                width: 64px;
+                height: 64px;
+                margin-bottom: 1rem;
+                fill: var(--primary-color);
+            }
+            .card-title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+            .card-description {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+                color: var(--text-color);
+                opacity: 0.8;
+                min-height: 40px;
+            }
+            .card-button {
+                display: inline-block;
+                background-color: var(--primary-color);
+                color: var(--button-text-color);
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: background-color 0.2s ease;
+            }
+            .card-button:hover {
+                background-color: #a765f1;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Server Dashboard</h1>
+        <div class="grid">
+            <div class="card">
+                <svg
+                    class="card-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M4 8.083v7.834c0 .543.603.901 1.06.6L9.58 13.5v-3L5.06 7.483c-.457-.3-.06-.6.06-.6zM10.75 13.29l4.52 2.917c.457.3 1.06-.057 1.06-.6V8.39c0-.543-.603-.901-1.06-.6L10.75 10.7v3.013v.577z"
+                        fill="currentColor"
+                    ></path>
+                </svg>
+                <h2 class="card-title">Jellyfin</h2>
+                <p class="card-description">Streamujte svoje médiá</p>
+                <a href="http://media.home" class="card-button">Otvoriť</a>
+            </div>
+            <div class="card">
+                <svg
+                    class="card-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M10 4H4c-1.11 0-2 .9-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
+                        fill="currentColor"
+                    ></path>
+                </svg>
+                <h2 class="card-title">File Browser</h2>
+                <p class="card-description">Prehliadajte súbory na serveri</p>
+                <a href="http://files.home" class="card-button">Otvoriť</a>
+            </div>
+            <div class="card">
+                <svg
+                    class="card-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M21 13v-2h-2V5h2V3h-2a2 2 0 00-2 2v6h-4V5a2 2 0 00-2-2H9a2 2 0 00-2 2v6H3v2h4v6a2 2 0 002 2h6a2 2 0 002-2v-6h4z"
+                        fill="currentColor"
+                    ></path>
+                </svg>
+                <h2 class="card-title">Beszel</h2>
+                <p class="card-description">Monitorovanie servera</p>
+                <a href="http://dash.home" class="card-button">Otvoriť</a>
+            </div>
+            <div class="card">
+                <svg
+                    class="card-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
+                        fill="currentColor"
+                    ></path>
+                </svg>
+                <h2 class="card-title">PinchFlat</h2>
+                <p class="card-description">Sťahovanie videí</p>
+                <a href="http://yt-down.home" class="card-button">Otvoriť</a>
+            </div>
+        </div>
+    </body>
+</html>

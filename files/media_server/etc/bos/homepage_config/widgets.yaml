@@ -1,6 +1,0 @@
-- jellyfin:
-    service: jellyfin
-    showStats: true
-
-- beszel:
-    service: beszel

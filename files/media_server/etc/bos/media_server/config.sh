@@ -8,6 +8,10 @@
 export CADDY_SERVICES="
 # --- HTTPS site with path-based routing ---
 home.ancon-mimosa.ts.net {
+    # Dashboard
+    file_server {
+        root /usr/share/www/dashboard
+    }
 
     # Jellyfin
     handle_path /media* {
@@ -33,13 +37,9 @@ http://dash.home, http://www.dash.home {
     reverse_proxy localhost:8090
 }
 
-http://homepage.home, http://www.homepage.home {
-    reverse_proxy localhost:3000
-}
-
-http://downloads.home, http://www.downloads.home {
+http://yt-down.home, http://www.yt-down.home {
     reverse_proxy localhost:8089
 }
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home homepage.home downloads.home"
+export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home"
