@@ -40,6 +40,12 @@ http://dash.home, http://www.dash.home {
 http://yt-down.home, http://www.yt-down.home {
     reverse_proxy localhost:8089
 }
+
+http://home.home, http://www.home.home {
+    file_server {
+        root /usr/share/www/dashboard
+    }
+}
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home"
+export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home"
