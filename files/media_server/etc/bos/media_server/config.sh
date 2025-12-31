@@ -38,13 +38,12 @@ http://dash.home, http://www.dash.home {
 }
 
 http://yt-down.home, http://www.yt-down.home {
-    reverse_proxy localhost:8089
+    reverse_proxy localhost:8945
 }
 
 http://home.home, http://www.home.home {
-    file_server {
-        root /usr/share/www/dashboard
-    }
+    root * /usr/share/www/dashboard
+    file_server
 }
 "
 

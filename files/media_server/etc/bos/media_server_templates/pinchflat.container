@@ -8,10 +8,10 @@ After=network-online.target
 Wants=network-online.target
 
 [Container]
-Image=docker.io/housediphage/pinchflat:latest
+Image=ghcr.io/kieraneglin/pinchflat:latest
 ContainerName=pinchflat
 User=1006:1003
-PublishPort=127.0.0.1:8089:8080
+PublishPort=127.0.0.1:8945:8945
 
 # Volume for persistent configuration
 Volume=/var/opt/pinchflat/config:/config:Z
