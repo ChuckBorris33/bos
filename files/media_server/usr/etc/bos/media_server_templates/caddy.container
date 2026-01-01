@@ -33,6 +33,10 @@ Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
 Volume=/var/opt/caddy/config:/config:Z
 Volume=/var/opt/caddy/data:/data:Z
 
+# Volume for static website content
+Volume=/usr/share/www:/srv/www:ro,Z
+
+
 [Service]
 Restart=on-failure
 

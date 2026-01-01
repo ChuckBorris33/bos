@@ -10,7 +10,7 @@ export CADDY_SERVICES="
 home.ancon-mimosa.ts.net {
     # Dashboard
     file_server {
-        root /usr/share/www/dashboard
+        root /srv/www/dashboard
     }
 
     # Jellyfin
@@ -42,7 +42,7 @@ http://yt-down.home, http://www.yt-down.home {
 }
 
 http://home.home, http://www.home.home {
-    root * /usr/share/www/dashboard
+    root * /srv/www/dashboard
     file_server
 }
 "

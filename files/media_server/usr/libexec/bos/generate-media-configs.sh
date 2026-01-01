@@ -10,12 +10,12 @@ export MEDIA_SERVER_IP
 
 # Source the service definitions
 set -a
-if [ -f /etc/bos/media_server/config.sh ]; then
-  . /etc/bos/media_server/config.sh
+if [ -f /usr/etc/bos/media_server/config.sh ]; then
+  . /usr/etc/bos/media_server/config.sh
 fi
 set +a
 
-TPL_DIR="/etc/bos/media_server_templates"
+TPL_DIR="/usr/etc/bos/media_server_templates"
 
 echo "Generating Caddyfile..."
 mkdir -p /etc/caddy
