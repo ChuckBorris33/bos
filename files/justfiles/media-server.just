@@ -81,7 +81,7 @@ restart-media-services:
     #!/usr/bin/env bash
     set -euxo pipefail
     echo "Restarting media services..."
-    sudo systemctl start media-config-subst.service
+    sudo /usr/libexec/bos/generate-media-configs.sh
     sudo systemctl daemon-reload
     sudo systemctl restart dnsmasq.service || true
     sudo systemctl restart caddy.service || true
