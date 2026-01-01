@@ -43,11 +43,9 @@ setup-media-services:
     if ! getent passwd beszel >/dev/null; then sudo useradd --system --gid beszel --uid 1004 --no-create-home --shell /bin/false beszel; fi
     sudo chown -R beszel:beszel /var/opt/beszel
 
-    echo "Initializing PinchFlat user and directories..."
-    sudo mkdir -p /var/opt/pinchflat/config
-    if ! getent group pinchflat >/dev/null; then sudo groupadd --system --gid 1006 pinchflat; fi
-    if ! getent passwd pinchflat >/dev/null; then sudo useradd --system --gid pinchflat --uid 1006 --no-create-home --shell /bin/false pinchflat; fi
-    sudo chown -R pinchflat:pinchflat /var/opt/pinchflat
+    echo "Initializing Metube user and directories..."
+    if ! getent group metube >/dev/null; then sudo groupadd --system --gid 1006 metube; fi
+    if ! getent passwd metube >/dev/null; then sudo useradd --system --gid metube --uid 1006 --no-create-home --shell /bin/false metube; fi
 
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
@@ -63,7 +61,7 @@ setup-media-services:
     echo "Adding users to serverstorage group..."
     sudo usermod -aG serverstorage jellyfin
     sudo usermod -aG serverstorage filebrowser
-    sudo usermod -aG serverstorage pinchflat
+    sudo usermod -aG serverstorage metube
 
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
@@ -84,7 +82,7 @@ restart-media-services:
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
-    sudo systemctl restart pinchflat.service || true
+    sudo systemctl restart metube.service || true
     echo "Media services restarted!"
 
 [group('Setup')]

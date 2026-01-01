@@ -38,7 +38,7 @@ http://dash.home, http://www.dash.home {
 }
 
 http://yt-down.home, http://www.yt-down.home {
-    reverse_proxy localhost:8945
+    reverse_proxy localhost:8081
 }
 
 http://home.home, http://www.home.home {
