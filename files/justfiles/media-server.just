@@ -67,6 +67,12 @@ setup-media-services:
     sudo chown -R filebrowser:serverstorage /var/server_storage
     sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage
 
+    echo "Initializing WWW directory..."
+    sudo mkdir -p /var/www
+    if [ -d "/usr/share/www" ]; then
+        sudo cp -r /usr/share/www/* /var/www/
+    fi
+
     ujust restart-media-services
     echo "Media services setup complete!"
 
