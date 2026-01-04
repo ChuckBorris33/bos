@@ -1,0 +1,20 @@
+[Unit]
+Description=Samba Server
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=docker.io/dockurr/samba:latest
+ContainerName=samba
+PublishPort=445:445
+Volume=/var/server_storage:/Data:Z
+Environment=SAMBA_AUTHENTICATION=false
+Environment=SAMBA_GUEST=true
+Environment=SAMBA_SHARE_NAME=Data
+Environment=SAMBA_SHARE_PATH=/Data
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

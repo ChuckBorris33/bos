@@ -45,7 +45,7 @@ if [ -f "${AGENT_SERVICE_FILE}" ]; then
   mkdir -p "${AGENT_OVERRIDE_DIR}"
   cat > "${AGENT_OVERRIDE_DIR}/10-service-patterns.conf" <<EOF
 [Service]
-Environment="SERVICE_PATTERNS=beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,tailscale*,firewall*,sshd*"
+Environment="SERVICE_PATTERNS=beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*"
 EOF
 fi
 
