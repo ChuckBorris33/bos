@@ -5,10 +5,15 @@ Wants=network-online.target
 
 [Container]
 Image=docker.io/dockurr/samba:latest
+User=1002:1003
 ContainerName=samba
 PublishPort=445:445
+Environment=USER=samba
+Environment=PASS=samba
+Environment=UID=1007
+Environment=GID=1003
+Environment="SHARE=Data;/Data;yes;no;yes"
 Volume=/var/server_storage:/Data:z
-Volume=/etc/bos/samba/smb.conf:/etc/samba/smb.conf:ro,Z
 
 [Service]
 Restart=on-failure
