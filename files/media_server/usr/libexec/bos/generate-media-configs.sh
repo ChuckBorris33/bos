@@ -37,6 +37,10 @@ envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.
 # copy the rest of the container files
 cp "${TPL_DIR}"/*.container /etc/containers/systemd/
 
+echo "Copying Samba config..."
+mkdir -p /etc/bos/samba
+cp "${TPL_DIR}/smb.conf" /etc/bos/samba/smb.conf
+
 echo "Configuring Beszel Agent if present..."
 AGENT_SERVICE_FILE="/etc/systemd/system/beszel-agent.service"
 if [ -f "${AGENT_SERVICE_FILE}" ]; then

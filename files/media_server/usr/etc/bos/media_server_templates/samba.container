@@ -7,11 +7,8 @@ Wants=network-online.target
 Image=docker.io/dockurr/samba:latest
 ContainerName=samba
 PublishPort=445:445
-Volume=/var/server_storage:/Data:Z
-Environment=SAMBA_AUTHENTICATION=false
-Environment=SAMBA_GUEST=true
-Environment=SAMBA_SHARE_NAME=Data
-Environment=SAMBA_SHARE_PATH=/Data
+Volume=/var/server_storage:/Data:z
+Volume=/etc/bos/samba/smb.conf:/etc/samba/smb.conf:ro,Z
 
 [Service]
 Restart=on-failure
