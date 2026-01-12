@@ -1,11 +1,4 @@
 #!/bin/bash
-#
-# This script configures a Fedora system at build time
-# to automatically log in a user and start Steam in Big Picture mode using Gamescope.
-#
-# WARNING: This script will modify your system configuration.
-# It is designed to be run within a build environment (e.g., container build) as root.
-#
 
 set -euo pipefail
 

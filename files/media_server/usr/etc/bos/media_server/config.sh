@@ -22,6 +22,11 @@ home.ancon-mimosa.ts.net {
     handle_path /files* {
         reverse_proxy localhost:8088
     }
+
+    # fsqd
+    handle_path /downloads* {
+        reverse_proxy localhost:8092
+    }
 }
 
 # --- HTTP redirects for old .home names ---
@@ -31,6 +36,10 @@ http://media.home, http://www.media.home {
 
 http://files.home, http://www.files.home {
     reverse_proxy localhost:8088
+}
+
+http://downloads.home, http://www.downloads.home {
+    reverse_proxy localhost:8092
 }
 
 http://dash.home, http://www.dash.home {
@@ -47,4 +56,4 @@ http://home.home, http://www.home.home {
 }
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home"
+export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home"

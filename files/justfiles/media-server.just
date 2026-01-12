@@ -47,6 +47,12 @@ setup-media-services:
     if ! getent group metube >/dev/null; then sudo groupadd --system --gid 1006 metube; fi
     if ! getent passwd metube >/dev/null; then sudo useradd --system --gid metube --uid 1006 --no-create-home --shell /bin/false metube; fi
 
+    echo "Initializing fsqd user and directories..."
+    sudo mkdir -p /var/opt/fsqd/cache
+    if ! getent group fsqd >/dev/null; then sudo groupadd --system --gid 1008 fsqd; fi
+    if ! getent passwd fsqd >/dev/null; then sudo useradd --system --gid fsqd --uid 1008 --no-create-home --shell /bin/false fsqd; fi
+    sudo chown -R fsqd:fsqd /var/opt/fsqd
+
     echo "Initializing Samba user and directories..."
     if ! getent group samba >/dev/null; then sudo groupadd --system --gid 1007 samba; fi
     if ! getent passwd samba >/dev/null; then sudo useradd --system --gid samba --uid 1007 --no-create-home --shell /bin/false samba; fi
@@ -67,6 +73,7 @@ setup-media-services:
     sudo usermod -aG serverstorage filebrowser
     sudo usermod -aG serverstorage metube
     sudo usermod -aG serverstorage samba
+    sudo usermod -aG serverstorage fsqd
 
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
@@ -95,6 +102,7 @@ restart-media-services:
     sudo systemctl restart beszel.service || true
     sudo systemctl restart metube.service || true
     sudo systemctl restart samba.service || true
+    sudo systemctl restart fsqd.service || true
     echo "Media services restarted!"
 
 [group('Setup')]
