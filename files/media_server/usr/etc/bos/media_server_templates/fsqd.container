@@ -9,10 +9,10 @@ ContainerName=fsqd
 PublishPort=8092:8080
 Environment=HOST=0.0.0.0
 User=1008:1003
-Environment=PORT=8092
+Environment=PORT=8080
 Environment=DOWNLOAD_DIR=/downloads
 Environment=CACHE_DIR=/cache
-Volume=/var/server_storage/downloads:/downloads:Z
+Volume=/var/server_storage/downloads:/downloads:z
 Volume=/var/opt/fsqd/cache:/cache:Z
 
 [Service]
