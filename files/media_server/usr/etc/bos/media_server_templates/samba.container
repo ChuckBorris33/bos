@@ -5,7 +5,6 @@ Wants=network-online.target
 
 [Container]
 Image=docker.io/dockurr/samba:latest
-User=1007:1003
 ContainerName=samba
 PublishPort=445:445
 Environment=USER=samba
