@@ -1,10 +1,7 @@
 [group('Setup')]
-setup-media-services:
+setup-caddy:
     #!/usr/bin/env bash
     set -euxo pipefail
-
-    echo "Setting up media services..."
-    echo "This will configure Jellyfin, Caddy, and other media services."
 
     echo "Initializing Caddy user and directories..."
     sudo mkdir -p /var/opt/caddy/config /var/opt/caddy/data
@@ -12,12 +9,30 @@ setup-media-services:
     if ! getent passwd caddy >/dev/null; then sudo useradd --system --gid caddy --uid 82 --no-create-home --shell /bin/false caddy; fi
     sudo chown -R caddy:caddy /var/opt/caddy
 
+[group('Setup')]
+setup-dnsmasq:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
     echo "Initializing dnsmasq user and directories..."
     sudo mkdir -p /var/opt/dnsmasq/dnsmasq.d
     sudo touch /var/opt/dnsmasq/dnsmasq.custom
     if ! getent group dnsmasq >/dev/null; then sudo groupadd --system --gid 99 dnsmasq; fi
     if ! getent passwd dnsmasq >/dev/null; then sudo useradd --system --gid dnsmasq --uid 99 --no-create-home --shell /bin/false dnsmasq; fi
     sudo chown -R dnsmasq:dnsmasq /var/opt/dnsmasq
+
+# Private entrypoint - creates the serverstorage group
+_ensure-serverstorage-group:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Initializing serverstorage group..."
+    if ! getent group serverstorage >/dev/null; then sudo groupadd --system --gid 1003 serverstorage; fi
+
+[group('Setup')]
+setup-jellyfin: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
 
     echo "Initializing Jellyfin user and directories..."
     sudo mkdir -p /var/opt/jellyfin/config /var/opt/jellyfin/cache
@@ -29,6 +44,14 @@ setup-media-services:
         sudo chown jellyfin:jellyfin /var/opt/jellyfin/config/authentication.xml
     fi
 
+    echo "Adding jellyfin to serverstorage group..."
+    sudo usermod -aG serverstorage jellyfin
+
+[group('Setup')]
+setup-filebrowser: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
     echo "Initializing File Browser user and directories..."
     sudo mkdir -p /var/opt/filebrowser
     sudo mkdir -p /var/opt/filebrowser/config
@@ -37,15 +60,36 @@ setup-media-services:
     if ! getent passwd filebrowser >/dev/null; then sudo useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
     sudo chown -R filebrowser:filebrowser /var/opt/filebrowser
 
+    echo "Adding filebrowser to serverstorage group..."
+    sudo usermod -aG serverstorage filebrowser
+
+[group('Setup')]
+setup-beszel:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
     echo "Initializing Beszel user and directories..."
     sudo mkdir -p /var/opt/beszel/data
     if ! getent group beszel >/dev/null; then sudo groupadd --system --gid 1004 beszel; fi
     if ! getent passwd beszel >/dev/null; then sudo useradd --system --gid beszel --uid 1004 --no-create-home --shell /bin/false beszel; fi
     sudo chown -R beszel:beszel /var/opt/beszel
 
+[group('Setup')]
+setup-metube: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
     echo "Initializing Metube user and directories..."
     if ! getent group metube >/dev/null; then sudo groupadd --system --gid 1006 metube; fi
     if ! getent passwd metube >/dev/null; then sudo useradd --system --gid metube --uid 1006 --no-create-home --shell /bin/false metube; fi
+
+    echo "Adding metube to serverstorage group..."
+    sudo usermod -aG serverstorage metube
+
+[group('Setup')]
+setup-fsqd: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
 
     echo "Initializing fsqd user and directories..."
     sudo mkdir -p /var/opt/fsqd/cache
@@ -53,9 +97,25 @@ setup-media-services:
     if ! getent passwd fsqd >/dev/null; then sudo useradd --system --gid fsqd --uid 1008 --no-create-home --shell /bin/false fsqd; fi
     sudo chown -R fsqd:fsqd /var/opt/fsqd
 
+    echo "Adding fsqd to serverstorage group..."
+    sudo usermod -aG serverstorage fsqd
+
+[group('Setup')]
+setup-samba: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
     echo "Initializing Samba user and directories..."
     if ! getent group samba >/dev/null; then sudo groupadd --system --gid 1007 samba; fi
     if ! getent passwd samba >/dev/null; then sudo useradd --system --gid samba --uid 1007 --no-create-home --shell /bin/false samba; fi
+
+    echo "Adding samba to serverstorage group..."
+    sudo usermod -aG serverstorage samba
+
+[group('Setup')]
+setup-server-storage: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
 
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
@@ -64,16 +124,6 @@ setup-media-services:
 
     echo "Creating storage directories..."
     sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
-
-    echo "Initializing serverstorage group..."
-    if ! getent group serverstorage >/dev/null; then sudo groupadd --system --gid 1003 serverstorage; fi
-
-    echo "Adding users to serverstorage group..."
-    sudo usermod -aG serverstorage jellyfin
-    sudo usermod -aG serverstorage filebrowser
-    sudo usermod -aG serverstorage metube
-    sudo usermod -aG serverstorage samba
-    sudo usermod -aG serverstorage fsqd
 
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
@@ -85,8 +135,49 @@ setup-media-services:
         sudo cp -r /usr/share/www/* /var/www/
     fi
 
+[group('Setup')]
+setup-media-services:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Setting up media services..."
+    echo "This will configure Jellyfin, Caddy, and other media services."
+
+    ujust setup-caddy
+    ujust setup-dnsmasq
+    ujust setup-jellyfin
+    ujust setup-filebrowser
+    ujust setup-beszel
+    ujust setup-metube
+    ujust setup-fsqd
+    ujust setup-samba
+    ujust setup-server-storage
+
     ujust restart-media-services
     echo "Media services setup complete!"
+
+[group('Setup')]
+setup-media-services-interactive:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    choices=$(gum choose --no-limit \
+        "setup-caddy" \
+        "setup-dnsmasq" \
+        "setup-jellyfin" \
+        "setup-filebrowser" \
+        "setup-beszel" \
+        "setup-metube" \
+        "setup-fsqd" \
+        "setup-samba" \
+        "setup-server-storage")
+
+    for choice in $choices; do
+        ujust $choice
+    done
+
+    ujust restart-media-services
+    echo "Selected media services setup complete!"
 
 [group('Debug')]
 restart-media-services:
@@ -181,6 +272,7 @@ setup-interactive:
         "set-default-shell" \
         "setup-tailscale" \
         "setup-media-services" \
+        "setup-media-services-interactive" \
         "setup-steam-kiosk")
 
     for choice in $choices; do
