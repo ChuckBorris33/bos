@@ -7,6 +7,11 @@ modules:
     files:
       - source: media_server
         destination: /
+  - type: systemd
+    system:
+      enabled:
+        - podman-auto-update.service
+        - podman-auto-update.timer
   - type: justfiles
     include:
       - apps.just

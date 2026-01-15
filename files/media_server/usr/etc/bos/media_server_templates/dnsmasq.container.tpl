@@ -13,6 +13,7 @@ Wants=network-online.target
 
 [Container]
 Image=docker.io/dockurr/dnsmasq:latest
+AutoUpdate=registry
 ContainerName=dnsmasq
 AddCapability=CAP_NET_BIND_SERVICE
 

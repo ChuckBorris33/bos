@@ -18,6 +18,7 @@ Description=Jellyfin Media Server
 [Container]
 # Use the official Jellyfin image
 Image=docker.io/jellyfin/jellyfin:latest
+AutoUpdate=registry
 ContainerName=jellyfin
 User=1002:1003
 

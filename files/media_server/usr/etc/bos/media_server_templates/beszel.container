@@ -9,6 +9,7 @@ Wants=network-online.target
 
 [Container]
 Image=docker.io/henrygd/beszel:latest
+AutoUpdate=registry
 ContainerName=beszel
 PublishPort=0.0.0.0:8090:8090
 Environment=AUTO_LOGIN=admin@dash.home

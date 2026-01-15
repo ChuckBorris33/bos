@@ -5,6 +5,7 @@ Wants=network-online.target
 
 [Container]
 Image=ghcr.io/alexta69/metube
+AutoUpdate=registry
 ContainerName=metube
 User=1006:1003
 

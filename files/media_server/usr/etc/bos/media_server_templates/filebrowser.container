@@ -15,6 +15,7 @@ Wants=network-online.target
 
 [Container]
 Image=docker.io/filebrowser/filebrowser:latest
+AutoUpdate=registry
 ContainerName=filebrowser
 User=1001:1003
 Environment=FB_NOAUTH=true
