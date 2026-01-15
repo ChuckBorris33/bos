@@ -57,3 +57,4 @@ http://home.home, http://www.home.home {
 "
 
 export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home"
+export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*"
