@@ -295,6 +295,7 @@ setup-steam-kiosk:
     #!/usr/bin/env bash
     set -euxo pipefail
 
+    TPL_DIR="/usr/etc/bos/media_server_templates"
     KIOSK_USER="steam"
 
     if ! id "$KIOSK_USER" &>/dev/null; then
@@ -319,9 +320,9 @@ setup-steam-kiosk:
     if [ -f "$KIOSK_SCRIPT" ]; then
         echo "Kiosk launch script already exists. Skipping."
     else
-        echo "Creating Steam launch script..."
+        echo "Setting up Steam launch script..."
         sudo mkdir -p "/home/$KIOSK_USER/"
-        echo "IyEvYmluL2Jhc2gKIyBTdGFydHMgYSBHYW1lc2NvcGUgc2Vzc2lvbiB3aXRoIFN0ZWFtIGluIEJpZyBQaWN0dXJlIG1vZGUgb24gVFRZMS4KCmlmIHRlc3QgIiQodHR5KSIgIT0gIi9kZXYvdHR5MSI7IHRoZW4KICAgIGV4aXQgMApmaQoKZ2FtZXNjb3BlIC1lIC1mIC0tIC91c3IvYmluL3N0ZWFtIC1iaWdwaWN0dXJlCg==" | sudo base64 -d > "$KIOSK_SCRIPT"
+        sudo cp "${TPL_DIR}/start_steam_kiosk.sh" "$KIOSK_SCRIPT"
         sudo chmod +x "$KIOSK_SCRIPT"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
     fi
@@ -331,11 +332,7 @@ setup-steam-kiosk:
         echo "User profile already configured. Skipping."
     else
         echo "Configuring user profile for kiosk mode..."
-        echo "" | sudo tee -a "$PROFILE_FILE" > /dev/null
-        echo "# If running on tty1, and no X session is running, start Steam kiosk mode." | sudo tee -a "$PROFILE_FILE" > /dev/null
-        echo 'if [ -z "$DISPLAY" ] && [ "	$(tty)" == "/dev/tty1" ]; then' | sudo tee -a "$PROFILE_FILE" > /dev/null
-        echo "  exec $KIOSK_SCRIPT" | sudo tee -a "$PROFILE_FILE" > /dev/null
-        echo "fi" | sudo tee -a "$PROFILE_FILE" > /dev/null
+        sudo cat "${TPL_DIR}/steam_kiosk_profile" >> "$PROFILE_FILE"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
     fi
 

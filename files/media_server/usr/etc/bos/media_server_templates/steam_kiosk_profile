@@ -1,0 +1,4 @@
+# If running on tty1, and no X session is running, start Steam kiosk mode.
+if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then
+  exec /home/steam/start_steam_kiosk.sh
+fi
