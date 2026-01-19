@@ -13,6 +13,8 @@ User=1008:1003
 Environment=PORT=8080
 Environment=DOWNLOAD_DIR=/downloads
 Environment=CACHE_DIR=/cache
+# Reduce memory footprint
+Environment=MALLOC_TRIM_THRESHOLD_=100000
 Volume=/var/server_storage/downloads:/downloads:z
 Volume=/var/opt/fsqd/cache:/cache:Z
 

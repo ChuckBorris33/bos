@@ -1,0 +1,43 @@
+# /etc/containers/systemd/audiobookshelf.container
+#
+# This Quadlet file runs the Audiobookshelf server as a systemd service.
+#
+# To use:
+# 1. Place this file in /etc/containers/systemd/
+# 2. On the host, create the audiobooks directory at /var/server_storage/audiobooks.
+#    This can be a Btrfs subvolume for snapshotting.
+#    sudo btrfs subvolume create /var/server_storage
+#    sudo mkdir /var/server_storage/audiobooks
+#    sudo chown -R audiobookshelf:serverstorage /var/server_storage/audiobooks
+# 3. Reload systemd: systemctl daemon-reload
+# 4. Start and enable the service: systemctl enable --now audiobookshelf.service
+
+[Unit]
+Description=Audiobookshelf Server
+
+[Container]
+# Use the official Audiobookshelf image
+Image=docker.io/advplyr/audiobookshelf:latest
+AutoUpdate=registry
+ContainerName=audiobookshelf
+User=1009:1003
+
+# Expose the web UI port only on the host's loopback interface
+PublishPort=127.0.0.1:13378:80/tcp
+
+# --- Volumes ---
+# Mount the audiobooks directory.
+# The ":Z" at the end handles SELinux permissions.
+Volume=/var/server_storage/audiobooks:/audiobooks:z
+
+# Persist configuration on the host machine
+Volume=/var/opt/audiobookshelf/config:/config:Z
+
+# --- Restart Policy ---
+# Automatically restart the container if it fails.
+[Service]
+Restart=on-failure
+
+[Install]
+# Start this service automatically on boot
+WantedBy=multi-user.target

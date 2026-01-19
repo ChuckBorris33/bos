@@ -208,6 +208,24 @@ setup-samba: _ensure-serverstorage-group
     sudo cp "/usr/etc/bos/media_server_templates/samba.container" /etc/containers/systemd/
 
 [group('Setup')]
+setup-audiobookshelf: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Initializing Audiobookshelf user and directories..."
+    sudo mkdir -p /var/opt/audiobookshelf/config
+    if ! getent group audiobookshelf >/dev/null; then sudo groupadd --system --gid 1009 audiobookshelf; fi
+    if ! getent passwd audiobookshelf >/dev/null; then sudo useradd --system --gid audiobookshelf --uid 1009 --no-create-home --shell /bin/false audiobookshelf; fi
+    sudo chown -R audiobookshelf:audiobookshelf /var/opt/audiobookshelf
+
+    echo "Adding audiobookshelf to serverstorage group..."
+    sudo usermod -aG serverstorage audiobookshelf
+
+    echo "Copying Audiobookshelf quadlet container file..."
+    sudo mkdir -p /etc/containers/systemd
+    sudo cp "/usr/etc/bos/media_server_templates/audiobookshelf.container" /etc/containers/systemd/
+
+[group('Setup')]
 setup-server-storage: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -218,7 +236,7 @@ setup-server-storage: _ensure-serverstorage-group
     fi
 
     echo "Creating storage directories..."
-    sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
+    sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads /var/server_storage/audiobooks
 
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
@@ -246,6 +264,7 @@ setup-media-services:
     ujust setup-metube
     ujust setup-fsqd
     ujust setup-samba
+    ujust setup-audiobookshelf
     ujust setup-server-storage
 
     ujust restart-media-services
@@ -265,6 +284,7 @@ setup-media-services-interactive:
         "setup-metube" \
         "setup-fsqd" \
         "setup-samba" \
+        "setup-audiobookshelf" \
         "setup-server-storage")
 
     for choice in $choices; do
@@ -288,6 +308,7 @@ restart-media-services:
     sudo systemctl restart metube.service || true
     sudo systemctl restart samba.service || true
     sudo systemctl restart fsqd.service || true
+    sudo systemctl restart audiobookshelf.service || true
     echo "Media services restarted!"
 
 [group('Setup')]

@@ -27,6 +27,11 @@ home.ancon-mimosa.ts.net {
     handle_path /downloads* {
         reverse_proxy localhost:8092
     }
+
+    # Audiobookshelf
+    handle_path /audiobooks* {
+        reverse_proxy localhost:13378
+    }
 }
 
 # --- HTTP redirects for old .home names ---
@@ -40,6 +45,10 @@ http://files.home, http://www.files.home {
 
 http://downloads.home, http://www.downloads.home {
     reverse_proxy localhost:8092
+}
+
+http://audiobooks.home, http://www.audiobooks.home {
+    reverse_proxy localhost:13378
 }
 
 http://dash.home, http://www.dash.home {
@@ -56,5 +65,5 @@ http://home.home, http://www.home.home {
 }
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home"
-export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*"
+export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home"
+export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*"
