@@ -33,6 +33,9 @@ Volume=/var/server_storage/audiobooks:/audiobooks:z
 # Persist configuration on the host machine
 Volume=/var/opt/audiobookshelf/config:/config:Z
 
+# Persist metadata on the host machine
+Volume=/var/opt/audiobookshelf/metadata:/metadata:Z
+
 # --- Restart Policy ---
 # Automatically restart the container if it fails.
 [Service]

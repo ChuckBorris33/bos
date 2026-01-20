@@ -11,9 +11,12 @@ source-config:
     set +a
 
 [group('Setup')]
-setup-caddy: source-config
+setup-caddy:
     #!/usr/bin/env bash
     set -euxo pipefail
+
+    # Source config with auto-export
+    set -a && source /usr/etc/bos/media_server/config.sh && set +a
 
     echo "Initializing Caddy user and directories..."
     sudo mkdir -p /var/opt/caddy/config /var/opt/caddy/data
@@ -32,7 +35,7 @@ setup-caddy: source-config
     echo "Generating Caddyfile..."
     TPL_DIR="/usr/etc/bos/media_server_templates"
     sudo mkdir -p /etc/caddy
-    sudo envsubst < "${TPL_DIR}/Caddyfile.tpl" > /etc/caddy/Caddyfile
+    sudo -E envsubst < "${TPL_DIR}/Caddyfile.tpl" > /etc/caddy/Caddyfile
     sudo chown -R caddy:caddy /etc/caddy
 
     echo "Copying Caddy quadlet container file..."
@@ -40,9 +43,12 @@ setup-caddy: source-config
     sudo cp "${TPL_DIR}/caddy.container" /etc/containers/systemd/
 
 [group('Setup')]
-setup-dnsmasq: source-config
+setup-dnsmasq:
     #!/usr/bin/env bash
     set -euxo pipefail
+
+    # Source config with auto-export
+    set -a && source /usr/etc/bos/media_server/config.sh && set +a
 
     echo "Initializing dnsmasq user and directories..."
     sudo mkdir -p /var/opt/dnsmasq/dnsmasq.d
@@ -72,7 +78,7 @@ setup-dnsmasq: source-config
 
     echo "Copying dnsmasq quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
-    sudo envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.container
+    sudo -E envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.container
 
 # Private entrypoint - creates the serverstorage group
 _ensure-serverstorage-group:
@@ -129,12 +135,8 @@ setup-beszel:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    # Source the service definitions
-    set -a
-    if [ -f /usr/etc/bos/media_server/config.sh ]; then
-        . /usr/etc/bos/media_server/config.sh
-    fi
-    set +a
+    # Source config with auto-export
+    set -a && source /usr/etc/bos/media_server/config.sh && set +a
 
     TPL_DIR="/usr/etc/bos/media_server_templates"
 
@@ -154,7 +156,7 @@ setup-beszel:
         echo "Found beszel-agent.service, configuring service patterns..."
         AGENT_OVERRIDE_DIR="${AGENT_SERVICE_FILE}.d"
         sudo mkdir -p "${AGENT_OVERRIDE_DIR}"
-        sudo envsubst < "${TPL_DIR}/10-service-patterns.conf" > "${AGENT_OVERRIDE_DIR}/10-service-patterns.conf"
+        sudo -E envsubst < "${TPL_DIR}/10-service-patterns.conf" > "${AGENT_OVERRIDE_DIR}/10-service-patterns.conf"
     fi
 
 [group('Setup')]
@@ -213,13 +215,17 @@ setup-audiobookshelf: _ensure-serverstorage-group
     set -euxo pipefail
 
     echo "Initializing Audiobookshelf user and directories..."
-    sudo mkdir -p /var/opt/audiobookshelf/config
+    sudo mkdir -p /var/opt/audiobookshelf/config /var/opt/audiobookshelf/metadata
     if ! getent group audiobookshelf >/dev/null; then sudo groupadd --system --gid 1009 audiobookshelf; fi
     if ! getent passwd audiobookshelf >/dev/null; then sudo useradd --system --gid audiobookshelf --uid 1009 --no-create-home --shell /bin/false audiobookshelf; fi
     sudo chown -R audiobookshelf:audiobookshelf /var/opt/audiobookshelf
 
     echo "Adding audiobookshelf to serverstorage group..."
     sudo usermod -aG serverstorage audiobookshelf
+
+    echo "Creating and setting permissions for audiobooks directory..."
+    sudo mkdir -p /var/server_storage/audiobooks
+    sudo chown -R audiobookshelf:serverstorage /var/server_storage/audiobooks
 
     echo "Copying Audiobookshelf quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
@@ -236,7 +242,7 @@ setup-server-storage: _ensure-serverstorage-group
     fi
 
     echo "Creating storage directories..."
-    sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads /var/server_storage/audiobooks
+    sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
 
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
@@ -256,6 +262,7 @@ setup-media-services:
     echo "Setting up media services..."
     echo "This will configure Jellyfin, Caddy, and other media services."
 
+    ujust setup-server-storage
     ujust setup-caddy
     ujust setup-dnsmasq
     ujust setup-jellyfin
@@ -265,7 +272,6 @@ setup-media-services:
     ujust setup-fsqd
     ujust setup-samba
     ujust setup-audiobookshelf
-    ujust setup-server-storage
 
     ujust restart-media-services
     echo "Media services setup complete!"
@@ -276,6 +282,7 @@ setup-media-services-interactive:
     set -euxo pipefail
 
     choices=$(gum choose --no-limit \
+        "setup-server-storage" \
         "setup-caddy" \
         "setup-dnsmasq" \
         "setup-jellyfin" \
@@ -284,8 +291,7 @@ setup-media-services-interactive:
         "setup-metube" \
         "setup-fsqd" \
         "setup-samba" \
-        "setup-audiobookshelf" \
-        "setup-server-storage")
+        "setup-audiobookshelf")
 
     for choice in $choices; do
         ujust $choice
