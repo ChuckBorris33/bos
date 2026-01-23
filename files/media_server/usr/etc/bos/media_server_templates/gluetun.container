@@ -1,0 +1,27 @@
+[Unit]
+Description=Gluetun VPN
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=qmcgaw/gluetun:latest
+AutoUpdate=registry
+ContainerName=gluetun
+CapAdd=NET_ADMIN
+Device=/dev/net/tun:/dev/net/tun
+PublishPort=8092:8080 # fsqd web UI port
+Environment=VPN_SERVICE_PROVIDER=protonvpn
+Environment=VPN_TYPE=openvpn
+EnvironmentFile=/var/opt/gluetun/credentials.env
+# Lightway setup
+Environment=BLOCK_MALICIOUS=off
+Environment=BLOCK_SURVEILLANCE=off
+Environment=BLOCK_ADS=off
+# Volumes
+Volume=/var/opt/gluetun:/gluetun:Z
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

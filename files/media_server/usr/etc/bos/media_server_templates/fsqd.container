@@ -1,12 +1,13 @@
 [Unit]
 Description=fsqd
-After=network-online.target
-Wants=network-online.target
+After=network-online.target gluetun.service
+Wants=network-online.target gluetun.service
 
 [Container]
 Image=ghcr.io/chuckborris33/fsqd:latest
 AutoUpdate=registry
 ContainerName=fsqd
+Network=container:gluetun
 PublishPort=8092:8080
 Environment=HOST=0.0.0.0
 User=1008:1003

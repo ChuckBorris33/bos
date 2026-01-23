@@ -233,6 +233,41 @@ setup-audiobookshelf: _ensure-serverstorage-group
     sudo cp "/usr/etc/bos/media_server_templates/audiobookshelf.container" /etc/containers/systemd/
 
 [group('Setup')]
+setup-gluetun:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Initializing Gluetun directories..."
+    sudo mkdir -p /var/opt/gluetun
+
+    CREDENTIALS_FILE="/var/opt/gluetun/credentials.env"
+    if [ -f "$CREDENTIALS_FILE" ]; then
+        if gum confirm "Gluetun credentials already exist. Do you want to update them?"; then
+            echo "Updating Gluetun credentials..."
+            USERNAME=$(gum input --placeholder "Enter ProtonVPN username" --prompt "Username: ")
+            PASSWORD=$(gum input --password --placeholder "Enter ProtonVPN password" --prompt "Password: ")
+            echo "OPENVPN_USER=$USERNAME" | sudo tee "$CREDENTIALS_FILE" > /dev/null
+            echo "OPENVPN_PASSWORD=$PASSWORD" | sudo tee -a "$CREDENTIALS_FILE" > /dev/null
+            sudo chmod 600 "$CREDENTIALS_FILE"
+            echo "Credentials updated securely to $CREDENTIALS_FILE"
+        else
+            echo "Keeping existing credentials."
+        fi
+    else
+        echo "Setting up Gluetun credentials..."
+        USERNAME=$(gum input --placeholder "Enter ProtonVPN username" --prompt "Username: ")
+        PASSWORD=$(gum input --password --placeholder "Enter ProtonVPN password" --prompt "Password: ")
+        echo "OPENVPN_USER=$USERNAME" | sudo tee "$CREDENTIALS_FILE" > /dev/null
+        echo "OPENVPN_PASSWORD=$PASSWORD" | sudo tee -a "$CREDENTIALS_FILE" > /dev/null
+        sudo chmod 600 "$CREDENTIALS_FILE"
+        echo "Credentials saved securely to $CREDENTIALS_FILE"
+    fi
+
+    echo "Copying Gluetun quadlet container file..."
+    sudo mkdir -p /etc/containers/systemd
+    sudo cp "/usr/etc/bos/media_server_templates/gluetun.container" /etc/containers/systemd/
+
+[group('Setup')]
 setup-server-storage: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -271,6 +306,7 @@ setup-media-services:
     ujust setup-beszel
     ujust setup-metube
     ujust setup-fsqd
+    ujust setup-gluetun
     ujust setup-samba
     ujust setup-audiobookshelf
 
@@ -291,6 +327,7 @@ setup-media-services-interactive:
         "setup-beszel" \
         "setup-metube" \
         "setup-fsqd" \
+        "setup-gluetun" \
         "setup-samba" \
         "setup-audiobookshelf")
 
@@ -313,6 +350,7 @@ restart-media-services:
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
     sudo systemctl restart metube.service || true
+    sudo systemctl restart gluetun.service || true
     sudo systemctl restart samba.service || true
     sudo systemctl restart fsqd.service || true
     sudo systemctl restart audiobookshelf.service || true
