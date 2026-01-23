@@ -23,7 +23,7 @@ ContainerName=audiobookshelf
 User=1009:1003
 
 # Set the port to 8000 to avoid privileged port issues
-Environment=AUDIOBOOKSHELF_PORT=8000
+Environment=PORT=8000
 
 # Expose the web UI port only on the host's loopback interface
 PublishPort=127.0.0.1:13378:8000/tcp

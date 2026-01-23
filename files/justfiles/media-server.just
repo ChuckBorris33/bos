@@ -226,6 +226,7 @@ setup-audiobookshelf: _ensure-serverstorage-group
     echo "Creating and setting permissions for audiobooks directory..."
     sudo mkdir -p /var/server_storage/audiobooks
     sudo chown -R audiobookshelf:serverstorage /var/server_storage/audiobooks
+    sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage/audiobooks
 
     echo "Copying Audiobookshelf quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
