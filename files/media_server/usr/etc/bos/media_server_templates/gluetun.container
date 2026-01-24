@@ -7,7 +7,7 @@ Wants=network-online.target
 Image=qmcgaw/gluetun:latest
 AutoUpdate=registry
 ContainerName=gluetun
-CapAdd=NET_ADMIN
+AddCapability=NET_ADMIN
 Device=/dev/net/tun:/dev/net/tun
 PublishPort=8092:8080 # fsqd web UI port
 Environment=VPN_SERVICE_PROVIDER=protonvpn
