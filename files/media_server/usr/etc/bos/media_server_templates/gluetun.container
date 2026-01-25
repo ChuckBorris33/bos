@@ -8,7 +8,7 @@ Image=qmcgaw/gluetun:latest
 AutoUpdate=registry
 ContainerName=gluetun
 AddCapability=NET_ADMIN
-Device=/dev/net/tun:/dev/net/tun
+AddDevice=/dev/net/tun:/dev/net/tun
 PublishPort=8092:8080 # fsqd web UI port
 Environment=VPN_SERVICE_PROVIDER=protonvpn
 Environment=VPN_TYPE=openvpn
