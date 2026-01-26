@@ -32,6 +32,11 @@ home.ancon-mimosa.ts.net {
     handle_path /audiobooks* {
         reverse_proxy localhost:13378
     }
+
+    # qBittorrent
+    handle_path /torrents* {
+        reverse_proxy localhost:8082
+    }
 }
 
 # --- HTTP redirects for old .home names ---
@@ -51,6 +56,10 @@ http://audiobooks.home, http://www.audiobooks.home {
     reverse_proxy localhost:13378
 }
 
+http://torrents.home, http://www.torrents.home {
+    reverse_proxy localhost:8082
+}
+
 http://dash.home, http://www.dash.home {
     reverse_proxy localhost:8090
 }
@@ -65,5 +74,5 @@ http://home.home, http://www.home.home {
 }
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home"
-export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*"
+export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home"
+export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,qbittorrent*"

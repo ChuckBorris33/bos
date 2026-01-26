@@ -9,6 +9,7 @@ AutoUpdate=registry
 ContainerName=gluetun
 AddCapability=NET_ADMIN
 AddDevice=/dev/net/tun:/dev/net/tun
+PublishPort=8082:8080 # qbittorrent web UI
 Environment=VPN_SERVICE_PROVIDER=protonvpn
 Environment=VPN_TYPE=openvpn
 Environment=DNS_PLAINTEXT_ADDRESS=1.1.1.1

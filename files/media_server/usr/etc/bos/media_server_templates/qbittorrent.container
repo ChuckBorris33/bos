@@ -1,0 +1,22 @@
+[Unit]
+Description=qBittorrent Daemon
+After=gluetun.service
+Wants=gluetun.service
+
+[Container]
+Image=lscr.io/linuxserver/qbittorrent:latest
+AutoUpdate=registry
+ContainerName=qbittorrent
+User=1010:1003
+Network=container:gluetun
+
+Environment=WEBUI_PORT=8080
+
+Volume=/var/opt/qbittorrent/config:/config:Z
+Volume=/var/server_storage/downloads:/downloads:z
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

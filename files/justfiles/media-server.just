@@ -268,6 +268,24 @@ setup-gluetun:
     sudo cp "/usr/etc/bos/media_server_templates/gluetun.container" /etc/containers/systemd/
 
 [group('Setup')]
+setup-qbittorrent: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Initializing qBittorrent user and directories..."
+    sudo mkdir -p /var/opt/qbittorrent/config
+    if ! getent group qbittorrent >/dev/null; then sudo groupadd --system --gid 1010 qbittorrent; fi
+    if ! getent passwd qbittorrent >/dev/null; then sudo useradd --system --gid qbittorrent --uid 1010 --no-create-home --shell /bin/false qbittorrent; fi
+    sudo chown -R qbittorrent:qbittorrent /var/opt/qbittorrent
+
+    echo "Adding qbittorrent to serverstorage group..."
+    sudo usermod -aG serverstorage qbittorrent
+
+    echo "Copying qBittorrent quadlet container file..."
+    sudo mkdir -p /etc/containers/systemd
+    sudo cp "/usr/etc/bos/media_server_templates/qbittorrent.container" /etc/containers/systemd/
+
+[group('Setup')]
 setup-server-storage: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -309,6 +327,7 @@ setup-media-services:
     ujust setup-gluetun
     ujust setup-samba
     ujust setup-audiobookshelf
+    ujust setup-qbittorrent
 
     ujust restart-media-services
     echo "Media services setup complete!"
@@ -329,7 +348,8 @@ setup-media-services-interactive:
         "setup-fsqd" \
         "setup-gluetun" \
         "setup-samba" \
-        "setup-audiobookshelf")
+        "setup-audiobookshelf" \
+        "setup-qbittorrent")
 
     for choice in $choices; do
         ujust $choice
@@ -354,6 +374,7 @@ restart-media-services:
     sudo systemctl restart samba.service || true
     sudo systemctl restart fsqd.service || true
     sudo systemctl restart audiobookshelf.service || true
+    sudo systemctl restart qbittorrent.service || true
     echo "Media services restarted!"
 
 [group('Setup')]
