@@ -43,6 +43,18 @@ setup-caddy:
     sudo cp "${TPL_DIR}/caddy.container" /etc/containers/systemd/
 
 [group('Setup')]
+setup-dashboard:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Setting up dashboard..."
+    sudo mkdir -p /var/www
+    sudo cp -r /usr/share/www/dashboard /var/www/
+    sudo chown -R caddy:caddy /var/www/dashboard
+    sudo chmod 644 /var/www/index.html
+    echo "Dashboard installed to /var/www/index.html"
+
+[group('Setup')]
 setup-dnsmasq:
     #!/usr/bin/env bash
     set -euxo pipefail
