@@ -193,7 +193,7 @@ setup-fsqd: _ensure-serverstorage-group
     set -euxo pipefail
 
     echo "Initializing fsqd user and directories..."
-    sudo mkdir -p /var/opt/fsqd/cache
+    sudo mkdir -p /var/opt/fsqd/data
     if ! getent group fsqd >/dev/null; then sudo groupadd --system --gid 1008 fsqd; fi
     if ! getent passwd fsqd >/dev/null; then sudo useradd --system --gid fsqd --uid 1008 --no-create-home --shell /bin/false fsqd; fi
     sudo chown -R fsqd:fsqd /var/opt/fsqd
