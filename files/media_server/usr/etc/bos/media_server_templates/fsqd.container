@@ -14,7 +14,7 @@ Environment=PORT=8080
 Environment=DOWNLOAD_DIR=/app/downloads
 Environment=DATA_DIR=/app/data
 Volume=/var/server_storage/downloads:/app/downloads:z
-Volume=/var/opt/fsqd/data/app/data:Z
+Volume=/var/opt/fsqd/data:/app/data:Z
 
 [Service]
 Restart=on-failure

@@ -256,8 +256,8 @@ setup-gluetun:
     if [ -f "$CREDENTIALS_FILE" ]; then
         if gum confirm "Gluetun credentials already exist. Do you want to update them?"; then
             echo "Updating Gluetun credentials..."
-            USERNAME=$(gum input --placeholder "Enter ProtonVPN username" --prompt "Username: ")
-            PASSWORD=$(gum input --password --placeholder "Enter ProtonVPN password" --prompt "Password: ")
+            USERNAME=$(gum input --placeholder "Enter OpenVPN username" --prompt "Username: ")
+            PASSWORD=$(gum input --password --placeholder "Enter OpenVPN password" --prompt "Password: ")
             echo "OPENVPN_USER=$USERNAME" | sudo tee "$CREDENTIALS_FILE" > /dev/null
             echo "OPENVPN_PASSWORD=$PASSWORD" | sudo tee -a "$CREDENTIALS_FILE" > /dev/null
             sudo chmod 600 "$CREDENTIALS_FILE"
