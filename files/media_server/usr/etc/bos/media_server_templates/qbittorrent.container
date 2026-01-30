@@ -7,7 +7,6 @@ Wants=gluetun.service
 Image=lscr.io/linuxserver/qbittorrent:latest
 AutoUpdate=registry
 ContainerName=qbittorrent
-User=1010:1003
 Network=container:gluetun
 
 Environment=PUID=1010
