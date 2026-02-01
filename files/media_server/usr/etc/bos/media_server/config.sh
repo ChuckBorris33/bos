@@ -37,6 +37,16 @@ home.ancon-mimosa.ts.net {
     handle_path /torrents* {
         reverse_proxy localhost:8082
     }
+
+    # Sonarr
+    handle_path /sonarr* {
+        reverse_proxy localhost:8989
+    }
+
+    # Radarr
+    handle_path /radarr* {
+        reverse_proxy localhost:7878
+    }
 }
 
 # --- HTTP redirects for old .home names ---
@@ -60,6 +70,14 @@ http://torrents.home, http://www.torrents.home {
     reverse_proxy localhost:8082
 }
 
+http://sonarr.home, http://www.sonarr.home {
+    reverse_proxy localhost:8989
+}
+
+http://radarr.home, http://www.radarr.home {
+    reverse_proxy localhost:7878
+}
+
 http://dash.home, http://www.dash.home {
     reverse_proxy localhost:8090
 }
@@ -74,5 +92,5 @@ http://home.home, http://www.home.home {
 }
 "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home"
-export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,qbittorrent*"
+export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home sonarr.home radarr.home"
+export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,qbittorrent*,sonarr*,radarr*"

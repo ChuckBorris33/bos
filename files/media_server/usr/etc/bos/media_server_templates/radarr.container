@@ -1,0 +1,24 @@
+[Unit]
+Description=Radarr (Movie Management)
+After=gluetun.service
+Wants=gluetun.service
+
+[Container]
+Image=lscr.io/linuxserver/radarr:latest
+AutoUpdate=registry
+ContainerName=radarr
+Network=container:gluetun
+
+Environment=PUID=1012
+Environment=PGID=1003
+Environment=UMASK_SET=022
+
+Volume=/var/opt/radarr/config:/config:Z
+Volume=/var/server_storage/media:/media:z
+Volume=/var/server_storage/downloads:/downloads:z
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

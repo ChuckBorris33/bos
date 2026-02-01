@@ -245,6 +245,42 @@ setup-audiobookshelf: _ensure-serverstorage-group
     sudo cp "/usr/etc/bos/media_server_templates/audiobookshelf.container" /etc/containers/systemd/
 
 [group('Setup')]
+setup-sonarr: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Initializing Sonarr user and directories..."
+    sudo mkdir -p /var/opt/sonarr/config
+    if ! getent group sonarr >/dev/null; then sudo groupadd --system --gid 1011 sonarr; fi
+    if ! getent passwd sonarr >/dev/null; then sudo useradd --system --gid sonarr --uid 1011 --no-create-home --shell /bin/false sonarr; fi
+    sudo chown -R sonarr:sonarr /var/opt/sonarr
+
+    echo "Adding sonarr to serverstorage group..."
+    sudo usermod -aG serverstorage sonarr
+
+    echo "Copying Sonarr quadlet container file..."
+    sudo mkdir -p /etc/containers/systemd
+    sudo cp "/usr/etc/bos/media_server_templates/sonarr.container" /etc/containers/systemd/
+
+[group('Setup')]
+setup-radarr: _ensure-serverstorage-group
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    echo "Initializing Radarr user and directories..."
+    sudo mkdir -p /var/opt/radarr/config
+    if ! getent group radarr >/dev/null; then sudo groupadd --system --gid 1012 radarr; fi
+    if ! getent passwd radarr >/dev/null; then sudo useradd --system --gid radarr --uid 1012 --no-create-home --shell /bin/false radarr; fi
+    sudo chown -R radarr:radarr /var/opt/radarr
+
+    echo "Adding radarr to serverstorage group..."
+    sudo usermod -aG serverstorage radarr
+
+    echo "Copying Radarr quadlet container file..."
+    sudo mkdir -p /etc/containers/systemd
+    sudo cp "/usr/etc/bos/media_server_templates/radarr.container" /etc/containers/systemd/
+
+[group('Setup')]
 setup-gluetun:
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -267,8 +303,8 @@ setup-gluetun:
         fi
     else
         echo "Setting up Gluetun credentials..."
-        USERNAME=$(gum input --placeholder "Enter ProtonVPN username" --prompt "Username: ")
-        PASSWORD=$(gum input --password --placeholder "Enter ProtonVPN password" --prompt "Password: ")
+        USERNAME=$(gum input --placeholder "Enter OpenVPN username" --prompt "Username: ")
+        PASSWORD=$(gum input --password --placeholder "Enter OpenVPN password" --prompt "Password: ")
         echo "OPENVPN_USER=$USERNAME" | sudo tee "$CREDENTIALS_FILE" > /dev/null
         echo "OPENVPN_PASSWORD=$PASSWORD" | sudo tee -a "$CREDENTIALS_FILE" > /dev/null
         sudo chmod 600 "$CREDENTIALS_FILE"
@@ -340,6 +376,8 @@ setup-media-services:
     ujust setup-samba
     ujust setup-audiobookshelf
     ujust setup-qbittorrent
+    ujust setup-sonarr
+    ujust setup-radarr
 
     ujust restart-media-services
     echo "Media services setup complete!"
@@ -361,7 +399,9 @@ setup-media-services-interactive:
         "setup-gluetun" \
         "setup-samba" \
         "setup-audiobookshelf" \
-        "setup-qbittorrent")
+        "setup-qbittorrent" \
+        "setup-sonarr" \
+        "setup-radarr")
 
     for choice in $choices; do
         ujust $choice
@@ -387,6 +427,8 @@ restart-media-services:
     sudo systemctl restart fsqd.service || true
     sudo systemctl restart audiobookshelf.service || true
     sudo systemctl restart qbittorrent.service || true
+    sudo systemctl restart sonarr.service || true
+    sudo systemctl restart radarr.service || true
     echo "Media services restarted!"
 
 [group('Setup')]

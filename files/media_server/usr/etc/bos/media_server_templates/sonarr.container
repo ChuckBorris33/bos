@@ -1,0 +1,24 @@
+[Unit]
+Description=Sonarr (TV Show Management)
+After=gluetun.service
+Wants=gluetun.service
+
+[Container]
+Image=lscr.io/linuxserver/sonarr:latest
+AutoUpdate=registry
+ContainerName=sonarr
+Network=container:gluetun
+
+Environment=PUID=1011
+Environment=PGID=1003
+Environment=UMASK_SET=022
+
+Volume=/var/opt/sonarr/config:/config:Z
+Volume=/var/server_storage/media:/media:z
+Volume=/var/server_storage/downloads:/downloads:z
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
