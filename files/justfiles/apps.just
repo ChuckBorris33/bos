@@ -2,6 +2,25 @@
 [group('Apps')]
 install-default-brew:
     #!/usr/bin/env bash
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew not found, installing..."
+        # The installation script will ask for sudo password.
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        # Add brew to path for this session
+        if [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        else
+            echo "Failed to find brew after installation." >&2
+            exit 1
+        fi
+    fi
+
+    if ! command -v brew &> /dev/null; then
+        echo "Brew is not available in PATH after attempting installation." >&2
+        exit 1
+    fi
+
     echo "Installing applications via Homebrew..."
     brew bundle --file /usr/share/brewfiles/default.Brewfile
 

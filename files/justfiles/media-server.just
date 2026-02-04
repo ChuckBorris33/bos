@@ -329,6 +329,11 @@ setup-qbittorrent: _ensure-serverstorage-group
     echo "Adding qbittorrent to serverstorage group..."
     sudo usermod -aG serverstorage qbittorrent
 
+    echo "Copying qBittorrent scripts..."
+    sudo mkdir -p /var/opt/scripts
+    sudo cp "/usr/etc/bos/media_server_templates/scripts/wait-for-vpn.sh" /var/opt/scripts/
+    sudo chmod +x /var/opt/scripts/wait-for-vpn.sh
+
     echo "Copying qBittorrent quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/qbittorrent.container" /etc/containers/systemd/
@@ -416,19 +421,36 @@ restart-media-services:
     set -euxo pipefail
     echo "Restarting media services..."
     sudo systemctl daemon-reload
+
+    # Stop VPN-dependent services first (so gluetun can restart)
+    echo "Stopping VPN-dependent services..."
+    sudo systemctl stop qbittorrent.service || true
+    sudo systemctl stop sonarr.service || true
+    sudo systemctl stop radarr.service || true
+
+    # Restart non-VPN services
     sudo systemctl restart dnsmasq.service || true
     sudo systemctl restart caddy.service || true
     sudo systemctl restart jellyfin.service || true
     sudo systemctl restart filebrowser.service || true
     sudo systemctl restart beszel.service || true
     sudo systemctl restart metube.service || true
-    sudo systemctl restart gluetun.service || true
     sudo systemctl restart samba.service || true
     sudo systemctl restart fsqd.service || true
     sudo systemctl restart audiobookshelf.service || true
-    sudo systemctl restart qbittorrent.service || true
-    sudo systemctl restart sonarr.service || true
-    sudo systemctl restart radarr.service || true
+
+    # Restart gluetun
+    echo "Restarting gluetun VPN..."
+    if sudo systemctl restart gluetun.service; then
+        echo "Gluetun restarted successfully. Restarting VPN-dependent services..."
+        sudo systemctl restart qbittorrent.service || true
+        sudo systemctl restart sonarr.service || true
+        sudo systemctl restart radarr.service || true
+    else
+        echo "ERROR: gluetun failed to restart. VPN-dependent services (qbittorrent, sonarr, radarr) are stopped."
+        exit 1
+    fi
+
     echo "Media services restarted!"
 
 [group('Setup')]

@@ -8,6 +8,7 @@ Image=lscr.io/linuxserver/qbittorrent:latest
 AutoUpdate=registry
 ContainerName=qbittorrent
 Network=container:gluetun
+Volume=/var/opt/scripts:/scripts:ro
 
 Environment=PUID=1010
 Environment=PGID=1003
@@ -20,6 +21,7 @@ Volume=/var/server_storage/downloads:/downloads:z
 
 [Service]
 Restart=on-failure
+ExecCondition=/scripts/wait-for-vpn.sh
 
 [Install]
 WantedBy=multi-user.target
