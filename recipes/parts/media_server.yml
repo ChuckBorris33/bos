@@ -28,9 +28,9 @@ modules:
     configurations:
       - scope: user
         repo:
-          # you can override the title to make inclusion of both system and user repos clearer
           title: Flathub (user)
-        install: []
+        install:
+          - org.pegasus_frontend.Pegasus
   - type: script
     scripts:
       - "install_steam.sh"

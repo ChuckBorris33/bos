@@ -1,4 +1,4 @@
-# If running on tty1, and no X session is running, start Steam kiosk mode.
+# If running on tty1, and no X session is running, start Pegasus frontend.
 if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then
-  exec /home/steam/start_steam_kiosk.sh
+  exec /home/steam/start_pegasus_kiosk.sh
 fi

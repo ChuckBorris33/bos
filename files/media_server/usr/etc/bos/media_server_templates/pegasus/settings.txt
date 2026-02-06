@@ -1,0 +1,4 @@
+# Pegasus Frontend Settings
+theme: XboxOS
+input-mouse: false
+input-touch: false

@@ -454,12 +454,46 @@ restart-media-services:
     echo "Media services restarted!"
 
 [group('Setup')]
-setup-steam-kiosk:
+setup-pegasus-kiosk:
     #!/usr/bin/env bash
     set -euxo pipefail
 
     TPL_DIR="/usr/etc/bos/media_server_templates"
     KIOSK_USER="steam"
+
+    # Setup Pegasus configuration
+    echo "Setting up Pegasus configuration..."
+    PEGASUS_CONFIG_DIR="/home/$KIOSK_USER/.config/pegasus-frontend"
+    PEGASUS_THEME_DIR="$PEGASUS_CONFIG_DIR/themes"
+    sudo mkdir -p "$PEGASUS_CONFIG_DIR" "$PEGASUS_THEME_DIR"
+
+    # Copy Pegasus settings
+    sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_CONFIG_DIR/settings.txt"
+
+    # Copy Steam collection metadata
+    sudo mkdir -p "$PEGASUS_THEME_DIR/steam"
+    sudo cp "${TPL_DIR}/pegasus/collections/steam/metadata.txt" "$PEGASUS_THEME_DIR/steam/metadata.txt"
+
+    # Copy Apps collection metadata
+    sudo mkdir -p "$PEGASUS_THEME_DIR/apps"
+    sudo cp "${TPL_DIR}/pegasus/collections/apps/metadata.txt" "$PEGASUS_THEME_DIR/apps/metadata.txt"
+
+    # Install XboxOS theme
+    echo "Installing XboxOS theme..."
+    XBOXOS_URL=$(curl -s https://api.github.com/repos/alfredolvera/XboxOS/releases/latest | grep "browser_download_url.*\\.zip" | cut -d '"' -f 4)
+    if [ -n "$XBOXOS_URL" ]; then
+        TEMP_DIR=$(mktemp -d)
+        wget -q -O "$TEMP_DIR/xboxos.zip" "$XBOXOS_URL"
+        unzip -q "$TEMP_DIR/xboxos.zip" -d "$TEMP_DIR"
+        sudo rm -rf "$PEGASUS_THEME_DIR/XboxOS"
+        sudo mv "$TEMP_DIR"/* "$PEGASUS_THEME_DIR/XboxOS"
+        rm -rf "$TEMP_DIR"
+        echo "XboxOS theme installed successfully."
+    else
+        echo "Warning: Could not download XboxOS theme. Will use default theme."
+    fi
+
+    sudo chown -R "$KIOSK_USER:$KIOSK_USER" "/home/$KIOSK_USER/.config"
 
     if ! id "$KIOSK_USER" &>/dev/null; then
         echo "Creating user '$KIOSK_USER'..."
@@ -479,19 +513,19 @@ setup-steam-kiosk:
         echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin $KIOSK_USER --noclear %I \$TERM\nType=idle" | sudo tee "$autologin_conf" > /dev/null
     fi
 
-    KIOSK_SCRIPT="/home/$KIOSK_USER/start_steam_kiosk.sh"
+    KIOSK_SCRIPT="/home/$KIOSK_USER/start_pegasus_kiosk.sh"
     if [ -f "$KIOSK_SCRIPT" ]; then
         echo "Kiosk launch script already exists. Skipping."
     else
-        echo "Setting up Steam launch script..."
+        echo "Setting up Pegasus launch script..."
         sudo mkdir -p "/home/$KIOSK_USER/"
-        sudo cp "${TPL_DIR}/start_steam_kiosk.sh" "$KIOSK_SCRIPT"
+        sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
         sudo chmod +x "$KIOSK_SCRIPT"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
     fi
 
     PROFILE_FILE="/home/$KIOSK_USER/.bash_profile"
-    if [ -f "$PROFILE_FILE" ] && grep -q "start_steam_kiosk.sh" "$PROFILE_FILE"; then
+    if [ -f "$PROFILE_FILE" ] && grep -q "start_pegasus_kiosk.sh" "$PROFILE_FILE"; then
         echo "User profile already configured. Skipping."
     else
         echo "Configuring user profile for kiosk mode..."
@@ -499,9 +533,8 @@ setup-steam-kiosk:
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
     fi
 
-    echo "Steam Kiosk setup complete!"
+    echo "Pegasus Kiosk setup complete!"
 
-[group('Setup')]
 setup-all:
     @ujust install-default-brew
     @ujust install-default-flatpaks
@@ -510,7 +543,6 @@ setup-all:
     @ujust set-default-shell
     @ujust setup-tailscale
     @ujust setup-media-services
-    @ujust setup-steam-kiosk
 
 [group('Setup')]
 setup-interactive:
@@ -526,7 +558,7 @@ setup-interactive:
         "set-default-shell" \
         "setup-tailscale" \
         "setup-media-services-interactive" \
-        "setup-steam-kiosk")
+        "setup-pegasus-kiosk")
 
     for choice in $choices; do
         ujust $choice

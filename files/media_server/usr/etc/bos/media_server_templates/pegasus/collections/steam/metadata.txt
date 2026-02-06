@@ -1,0 +1,3 @@
+collection: Steam
+shortname: steam
+launch: /usr/bin/steam -bigpicture -applaunch {game.appid}

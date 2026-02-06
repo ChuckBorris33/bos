@@ -1,0 +1,19 @@
+collection: Apps
+shortname: apps
+launch: {file.path}
+
+game: Steam Big Picture
+file: /usr/bin/steam
+launch: /usr/bin/steam -bigpicture
+
+game: Jellyfin
+file: /usr/bin/firefox
+launch: /usr/bin/firefox --kiosk http://media.home
+
+game: Audiobookshelf
+file: /usr/bin/firefox
+launch: /usr/bin/firefox --kiosk http://audiobooks.home
+
+game: File Browser
+file: /usr/bin/firefox
+launch: /usr/bin/firefox --kiosk http://files.home

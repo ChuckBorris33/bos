@@ -2,20 +2,11 @@
 
 set -euo pipefail
 
-echo "--- Starting Steam Kiosk Setup (with Gamescope) ---"
+# Install RPMFusion non-free repository
+dnf install -y https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm >&2
 
-# --- 1. Enable SSH ---
-echo "[1/2] Enabling SSH..."
-systemctl enable sshd.service
-echo "      SSH enabled."
+# Install steam and gamescope
+dnf install -y steam gamescope >&2
 
-# --- 2. Install Steam and Gamescope using dnf ---
-echo "[2/2] Installing packages with dnf..."
-
-# Enable RPMFusion non-free repository directly with dnf
-echo "      Enabling RPMFusion non-free repository..."
-dnf install -y https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-
-# Install steam, gamescope, and other useful tools
-dnf install -y steam gamescope wget
-echo "      Package installation complete."
+# Enable SSH (best effort, may fail in container)
+systemctl enable sshd.service >&2 2>/dev/null || true

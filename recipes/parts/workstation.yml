@@ -56,4 +56,3 @@ modules:
     scripts:
       - install_vscode.sh
       - install_cosmic_clipboard_applet.sh
-  - type: script
