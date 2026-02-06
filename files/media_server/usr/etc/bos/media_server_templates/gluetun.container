@@ -11,12 +11,16 @@ AddCapability=NET_ADMIN
 AddDevice=/dev/net/tun:/dev/net/tun
 # qbittorrent web UI
 PublishPort=8082:8080
+# Radarr web UI
+PublishPort=7878:7878
+# Sonarr web UI
+PublishPort=8989:8989
 # gluetun health endpoint
 PublishPort=9090:9090
 Environment=VPN_SERVICE_PROVIDER=windscribe
 Environment=VPN_TYPE=openvpn
 Environment=DNS_PLAINTEXT_ADDRESS=1.1.1.1
-Environment=SERVER_REGIONS=Czech Republic
+Environment=SERVER_REGIONS="Czech Republic"
 EnvironmentFile=/var/opt/gluetun/credentials.env
 # Lightway setup
 Environment=BLOCK_MALICIOUS=off
