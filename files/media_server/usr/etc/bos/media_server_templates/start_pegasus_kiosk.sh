@@ -12,8 +12,10 @@ export XDG_RUNTIME_DIR=/run/user/$(id - u)
 # Ensure runtime directory exists
 mkdir -p "$XDG_RUNTIME_DIR"
 
+# Add flatpak to PATH if not already present
+export PATH="$PATH:/var/lib/flatpak/exports/bin:~/.local/share/flatpak/exports/bin"
+
 # Start Pegasus in Gamescope
 # -e: Enable steam integration
-# -f: Fullscreen
 # --: Separator for gamescope vs application args
-exec gamescope -e -f -- pegasus-fe
+exec gamescope -e -- flatpak run org.pegasus_frontend.Pegasus

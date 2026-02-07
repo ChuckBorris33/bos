@@ -487,9 +487,38 @@ setup-pegasus-kiosk:
         echo "User '$KIOSK_USER' already exists. Skipping creation."
     fi
 
+    # Get actual home directory (handles /home vs /var/home)
+    STEAM_HOME=$(getent passwd "$KIOSK_USER" | cut -d: -f6)
+    echo "Steam home directory: $STEAM_HOME"
+
+    # Ensure home directory exists and is owned by steam user
+    if [ ! -d "$STEAM_HOME" ]; then
+        echo "Creating home directory $STEAM_HOME..."
+        sudo mkdir -p "$STEAM_HOME"
+        sudo chown "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME"
+    fi
+
+    # Install Pegasus from Flathub
+    echo "Installing Pegasus frontend from Flathub..."
+    if ! flatpak list --system | grep -q org.pegasus_frontend.Pegasus; then
+        # Enable flathub if disabled
+        if flatpak remotes --system | grep -q "^flathub.*disabled"; then
+            echo "Enabling flathub remote..."
+            sudo flatpak remote-modify --system --enable flathub
+        fi
+        # Add flathub if not present
+        if ! flatpak remotes --system | grep -q "^flathub"; then
+            echo "Adding flathub remote..."
+            sudo flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        fi
+        sudo flatpak install flathub org.pegasus_frontend.Pegasus --system -y
+    else
+        echo "Pegasus already installed."
+    fi
+
     # Setup Pegasus configuration
     echo "Setting up Pegasus configuration..."
-    PEGASUS_CONFIG_DIR="/home/$KIOSK_USER/.config/pegasus-frontend"
+    PEGASUS_CONFIG_DIR="$STEAM_HOME/.config/pegasus-frontend"
     PEGASUS_THEME_DIR="$PEGASUS_CONFIG_DIR/themes"
     sudo mkdir -p "$PEGASUS_CONFIG_DIR" "$PEGASUS_THEME_DIR"
 
@@ -507,18 +536,18 @@ setup-pegasus-kiosk:
     # Theme installation skipped for now
     echo "Theme installation skipped - will use default theme."
 
-    sudo chown -R "$KIOSK_USER:$KIOSK_USER" "/home/$KIOSK_USER/.config"
+    sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
 
-    autologin_conf="/etc/systemd/system/getty@.service.d/override.conf"
+    autologin_conf="/etc/systemd/system/getty@tty1.service.d/override.conf"
     if [ -f "$autologin_conf" ] && grep -q "$KIOSK_USER" "$autologin_conf"; then
         echo "Autologin already configured. Skipping."
     else
-        echo "Configuring autologin for user '$KIOSK_USER'..."
+        echo "Configuring autologin for user '$KIOSK_USER' on TTY1 only..."
         sudo mkdir -p "$(dirname "$autologin_conf")"
-        echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin $KIOSK_USER --noclear %I \$TERM\nType=idle" | sudo tee "$autologin_conf" > /dev/null
+        echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin $KIOSK_USER --noclear tty1 \$TERM\nType=idle" | sudo tee "$autologin_conf" > /dev/null
     fi
 
-    KIOSK_SCRIPT="/home/$KIOSK_USER/start_pegasus_kiosk.sh"
+    KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
     if [ -f "$KIOSK_SCRIPT" ]; then
         echo "Kiosk launch script already exists. Skipping."
     else
@@ -529,7 +558,7 @@ setup-pegasus-kiosk:
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
     fi
 
-    PROFILE_FILE="/home/$KIOSK_USER/.bash_profile"
+    PROFILE_FILE="$STEAM_HOME/.bash_profile"
     if [ -f "$PROFILE_FILE" ] && grep -q "start_pegasus_kiosk.sh" "$PROFILE_FILE"; then
         echo "User profile already configured. Skipping."
     else

@@ -5,4 +5,4 @@ if test "$(tty)" != "/dev/tty1"; then
     exit 0
 fi
 
-gamescope -e -f -- /usr/bin/steam -bigpicture
+gamescope -e -- /usr/bin/steam -bigpicture
