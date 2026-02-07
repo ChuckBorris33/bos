@@ -13,9 +13,9 @@ Environment=PUID=1010
 Environment=PGID=1003
 Environment=UMASK_SET=022
 Environment=WEBUI_PORT=8080
-Environment=DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest
 
 Volume=/var/opt/qbittorrent/config:/config:Z
+Volume=/var/opt/qbittorrent/vuetorrent:/vuetorrent:Z
 Volume=/var/server_storage/downloads:/downloads:z
 
 [Service]

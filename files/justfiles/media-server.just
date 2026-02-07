@@ -322,9 +322,25 @@ setup-qbittorrent: _ensure-serverstorage-group
 
     echo "Initializing qBittorrent user and directories..."
     sudo mkdir -p /var/opt/qbittorrent/config
+    sudo mkdir -p /var/opt/qbittorrent/vuetorrent
     if ! getent group qbittorrent >/dev/null; then sudo groupadd --system --gid 1010 qbittorrent; fi
     if ! getent passwd qbittorrent >/dev/null; then sudo useradd --system --gid qbittorrent --uid 1010 --no-create-home --shell /bin/false qbittorrent; fi
     sudo chown -R qbittorrent:qbittorrent /var/opt/qbittorrent
+
+    echo "Downloading VueTorrent UI..."
+    VUETRENT_URL=$(curl -sfL "https://api.github.com/repos/WDaan/VueTorrent/releases/latest" | grep -o '"browser_download_url": "[^"]*\.zip"' | grep -v 'legacy' | head -1 | cut -d'"' -f4)
+    if [ -n "$VUETRENT_URL" ]; then
+        TEMP_DIR=$(mktemp -d)
+        curl -sfL -o "$TEMP_DIR/vuetorrent.zip" "$VUETRENT_URL"
+        unzip -q "$TEMP_DIR/vuetorrent.zip" -d "$TEMP_DIR"
+        sudo rm -rf /var/opt/qbittorrent/vuetorrent/*
+        sudo cp -r "$TEMP_DIR/vuetorrent"/* /var/opt/qbittorrent/vuetorrent/
+        rm -rf "$TEMP_DIR"
+        sudo chown -R qbittorrent:qbittorrent /var/opt/qbittorrent/vuetorrent
+        echo "VueTorrent installed successfully."
+    else
+        echo "Warning: Could not download VueTorrent. Using default WebUI."
+    fi
 
     echo "Adding qbittorrent to serverstorage group..."
     sudo usermod -aG serverstorage qbittorrent
@@ -461,6 +477,16 @@ setup-pegasus-kiosk:
     TPL_DIR="/usr/etc/bos/media_server_templates"
     KIOSK_USER="steam"
 
+    # Create steam user first (before using their home directory)
+    if ! id "$KIOSK_USER" &>/dev/null; then
+        echo "Creating user '$KIOSK_USER'..."
+        sudo useradd -m "$KIOSK_USER"
+        echo "Setting empty password for '$KIOSK_USER'..."
+        sudo passwd -d "$KIOSK_USER"
+    else
+        echo "User '$KIOSK_USER' already exists. Skipping creation."
+    fi
+
     # Setup Pegasus configuration
     echo "Setting up Pegasus configuration..."
     PEGASUS_CONFIG_DIR="/home/$KIOSK_USER/.config/pegasus-frontend"
@@ -478,31 +504,10 @@ setup-pegasus-kiosk:
     sudo mkdir -p "$PEGASUS_THEME_DIR/apps"
     sudo cp "${TPL_DIR}/pegasus/collections/apps/metadata.txt" "$PEGASUS_THEME_DIR/apps/metadata.txt"
 
-    # Install XboxOS theme
-    echo "Installing XboxOS theme..."
-    XBOXOS_URL=$(curl -s https://api.github.com/repos/alfredolvera/XboxOS/releases/latest | grep "browser_download_url.*\\.zip" | cut -d '"' -f 4)
-    if [ -n "$XBOXOS_URL" ]; then
-        TEMP_DIR=$(mktemp -d)
-        wget -q -O "$TEMP_DIR/xboxos.zip" "$XBOXOS_URL"
-        unzip -q "$TEMP_DIR/xboxos.zip" -d "$TEMP_DIR"
-        sudo rm -rf "$PEGASUS_THEME_DIR/XboxOS"
-        sudo mv "$TEMP_DIR"/* "$PEGASUS_THEME_DIR/XboxOS"
-        rm -rf "$TEMP_DIR"
-        echo "XboxOS theme installed successfully."
-    else
-        echo "Warning: Could not download XboxOS theme. Will use default theme."
-    fi
+    # Theme installation skipped for now
+    echo "Theme installation skipped - will use default theme."
 
     sudo chown -R "$KIOSK_USER:$KIOSK_USER" "/home/$KIOSK_USER/.config"
-
-    if ! id "$KIOSK_USER" &>/dev/null; then
-        echo "Creating user '$KIOSK_USER'..."
-        sudo useradd -m "$KIOSK_USER"
-        echo "Setting empty password for '$KIOSK_USER'..."
-        sudo passwd -d "$KIOSK_USER"
-    else
-        echo "User '$KIOSK_USER' already exists. Skipping creation."
-    fi
 
     autologin_conf="/etc/systemd/system/getty@.service.d/override.conf"
     if [ -f "$autologin_conf" ] && grep -q "$KIOSK_USER" "$autologin_conf"; then
