@@ -544,15 +544,6 @@ setup-pegasus-kiosk:
 
     sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
 
-    autologin_conf="/etc/systemd/system/getty@tty1.service.d/override.conf"
-    if [ -f "$autologin_conf" ] && grep -q "$KIOSK_USER" "$autologin_conf"; then
-        echo "Autologin already configured. Skipping."
-    else
-        echo "Configuring autologin for user '$KIOSK_USER' on TTY1 only..."
-        sudo mkdir -p "$(dirname "$autologin_conf")"
-        echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin $KIOSK_USER --noclear tty1 \$TERM\nType=idle" | sudo tee "$autologin_conf" > /dev/null
-    fi
-
     KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
     # Always copy the launch script to ensure the latest version is used
     echo "Setting up Pegasus launch script..."
@@ -560,16 +551,12 @@ setup-pegasus-kiosk:
     sudo chmod +x "$KIOSK_SCRIPT"
     sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
 
-    PROFILE_FILE="$STEAM_HOME/.bash_profile"
-    # Always copy the profile to ensure the latest version is used
-    echo "Configuring user profile for kiosk mode..."
-    # Clear existing content related to kiosk mode to prevent duplicates, then add new config
-    sudo sed -i '/^# If running on tty1, and no X\/Wayland session is running, start Sway\./d' "$PROFILE_FILE"
-    sudo sed -i '/^if \[ -z "\$DISPLAY" \] \&\& \[ -z "\$WAYLAND_DISPLAY" \] \&\& \[ "$(tty)" = "\/dev\/tty1" \]\; then/d' "$PROFILE_FILE"
-    sudo sed -i '/^  exec sway/d' "$PROFILE_FILE"
-    sudo sed -i '/^fi/d' "$PROFILE_FILE"
-    sudo cat "${TPL_DIR}/steam_kiosk_profile" >> "$PROFILE_FILE"
-    sudo chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
+    echo "Configuring display manager (greetd) for autologin..."
+    sudo mkdir -p "/etc/greetd"
+    AUTOLOGIN_CONF="/etc/greetd/config.toml"
+    echo '[initial_session]' | sudo tee "$AUTOLOGIN_CONF" > /dev/null
+    echo 'command = "sway"' | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
+    echo 'user = "steam"' | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
 
     echo "Pegasus Kiosk setup complete!"
 
