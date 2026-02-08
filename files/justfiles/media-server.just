@@ -536,6 +536,12 @@ setup-pegasus-kiosk:
     # Theme installation skipped for now
     echo "Theme installation skipped - will use default theme."
 
+    # Setup Sway configuration
+    echo "Setting up Sway configuration for Kiosk mode..."
+    SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway"
+    sudo mkdir -p "$SWAY_CONFIG_DIR"
+    sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/config"
+
     sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
 
     autologin_conf="/etc/systemd/system/getty@tty1.service.d/override.conf"
@@ -548,24 +554,22 @@ setup-pegasus-kiosk:
     fi
 
     KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
-    if [ -f "$KIOSK_SCRIPT" ]; then
-        echo "Kiosk launch script already exists. Skipping."
-    else
-        echo "Setting up Pegasus launch script..."
-        sudo mkdir -p "/home/$KIOSK_USER/"
-        sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
-        sudo chmod +x "$KIOSK_SCRIPT"
-        sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
-    fi
+    # Always copy the launch script to ensure the latest version is used
+    echo "Setting up Pegasus launch script..."
+    sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
+    sudo chmod +x "$KIOSK_SCRIPT"
+    sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
 
     PROFILE_FILE="$STEAM_HOME/.bash_profile"
-    if [ -f "$PROFILE_FILE" ] && grep -q "start_pegasus_kiosk.sh" "$PROFILE_FILE"; then
-        echo "User profile already configured. Skipping."
-    else
-        echo "Configuring user profile for kiosk mode..."
-        sudo cat "${TPL_DIR}/steam_kiosk_profile" >> "$PROFILE_FILE"
-        sudo chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
-    fi
+    # Always copy the profile to ensure the latest version is used
+    echo "Configuring user profile for kiosk mode..."
+    # Clear existing content related to kiosk mode to prevent duplicates, then add new config
+    sudo sed -i '/^# If running on tty1, and no X\/Wayland session is running, start Sway\./d' "$PROFILE_FILE"
+    sudo sed -i '/^if \[ -z "\$DISPLAY" \] \&\& \[ -z "\$WAYLAND_DISPLAY" \] \&\& \[ "$(tty)" = "\/dev\/tty1" \]\; then/d' "$PROFILE_FILE"
+    sudo sed -i '/^  exec sway/d' "$PROFILE_FILE"
+    sudo sed -i '/^fi/d' "$PROFILE_FILE"
+    sudo cat "${TPL_DIR}/steam_kiosk_profile" >> "$PROFILE_FILE"
+    sudo chown "$KIOSK_USER:$KIOSK_USER" "$PROFILE_FILE"
 
     echo "Pegasus Kiosk setup complete!"
 

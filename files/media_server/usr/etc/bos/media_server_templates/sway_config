@@ -1,0 +1,37 @@
+# Sway configuration for Pegasus Kiosk
+
+# Set Win key as mod
+set $mod Mod4
+
+# Set background
+output * bg /usr/share/backgrounds/default.jpg fill
+
+# font for window titles
+font pango:monospace 10
+
+# Autostart Pegasus in gamescope
+exec ~/start_pegasus_kiosk.sh
+
+# Make all new windows fullscreen
+for_window [class=".*"] fullscreen
+
+# toggle fullscreen
+bindsym $mod+f fullscreen
+
+# kill focused window (for debugging)
+bindsym $mod+Shift+q kill
+
+# reload config (for debugging)
+bindsym $mod+Shift+c reload
+
+# disable exit
+bindsym $mod+Shift+e mode "default"
+
+# Remove title bars
+default_border none
+
+# Show bar
+bar {
+    mode dock
+    status_command while true; do echo "Bluetooth settings available. Press Win+f to exit fullscreen."; date; done
+}

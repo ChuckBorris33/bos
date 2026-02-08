@@ -1,21 +1,17 @@
 #!/bin/bash
-# Starts a Gamescope session with Pegasus frontend on TTY1.
+# Starts a Gamescope session with Pegasus frontend.
 
-if test "$(tty)" != "/dev/tty1"; then
-    exit 0
-fi
+# This script is executed by Sway.
+# Environment variables like DISPLAY and XDG_RUNTIME_DIR are expected to be set by Sway.
 
-# Export required environment variables for Gamescope and Pegasus
-export DISPLAY=:0
-export XDG_RUNTIME_DIR=/run/user/$(id - u)
-
-# Ensure runtime directory exists
-mkdir -p "$XDG_RUNTIME_DIR"
-
-# Add flatpak to PATH if not already present
+# Add flatpak to PATH if not already present.
+# This is needed because sway may not run as a login shell.
 export PATH="$PATH:/var/lib/flatpak/exports/bin:~/.local/share/flatpak/exports/bin"
 
-# Start Pegasus in Gamescope
-# -e: Enable steam integration
+# Start Pegasus in Gamescope, fullscreen, FullHD.
+# -f: fullscreen
+# -W 1920 -H 1080: resolution
+# -e: Steam integration
 # --: Separator for gamescope vs application args
-exec gamescope -e -- flatpak run org.pegasus_frontend.Pegasus
+exec gamescope -f -W 1920 -H 1080 -e -- flatpak run org.pegasus_frontend.Pegasus
+
