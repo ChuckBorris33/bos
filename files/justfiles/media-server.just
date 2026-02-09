@@ -452,12 +452,9 @@ setup-pegasus-kiosk:
         sudo mkdir -p "$PEGASUS_FLATPAK_CONFIG_DIR" "$PEGASUS_FLATPAK_THEME_DIR"
         # Copy Pegasus settings
         sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_FLATPAK_CONFIG_DIR/settings.txt"
-        # Copy Steam collection metadata
-        sudo mkdir -p "$PEGASUS_FLATPAK_THEME_DIR/steam"
-        sudo cp "${TPL_DIR}/pegasus/collections/steam/metadata.txt" "$PEGASUS_FLATPAK_THEME_DIR/steam/metadata.txt"
-        # Copy Apps collection metadata
-        sudo mkdir -p "$PEGASUS_FLATPAK_THEME_DIR/apps"
-        sudo cp "${TPL_DIR}/pegasus/collections/apps/metadata.txt" "$PEGASUS_FLATPAK_THEME_DIR/apps/metadata.txt"
+            # Theme installation skipped for now to avoid incorrect configuration.
+            # Pegasus will use its default theme.
+
         # Ensure ownership for the steam user
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus"
         # Setup Sway configuration

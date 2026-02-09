@@ -1,3 +1,4 @@
+exec > /home/steam/sway_config.log 2>&1
 # Sway configuration for Pegasus Kiosk
 
 # Set Win key as mod
