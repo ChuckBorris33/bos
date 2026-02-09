@@ -29,9 +29,3 @@ bindsym $mod+Shift+e mode "default"
 
 # Remove title bars
 default_border none
-
-# Show bar
-bar {
-    mode dock
-    status_command while true; do echo "Bluetooth settings available. Press Win+f to exit fullscreen."; date; done
-}

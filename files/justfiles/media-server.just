@@ -516,49 +516,119 @@ setup-pegasus-kiosk:
         echo "Pegasus already installed."
     fi
 
-    # Setup Pegasus configuration
-    echo "Setting up Pegasus configuration..."
-    PEGASUS_CONFIG_DIR="$STEAM_HOME/.config/pegasus-frontend"
-    PEGASUS_THEME_DIR="$PEGASUS_CONFIG_DIR/themes"
-    sudo mkdir -p "$PEGASUS_CONFIG_DIR" "$PEGASUS_THEME_DIR"
+        # Setup Pegasus configuration (Flatpak specific)
 
-    # Copy Pegasus settings
-    sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_CONFIG_DIR/settings.txt"
+        echo "Setting up Pegasus Flatpak configuration..."
 
-    # Copy Steam collection metadata
-    sudo mkdir -p "$PEGASUS_THEME_DIR/steam"
-    sudo cp "${TPL_DIR}/pegasus/collections/steam/metadata.txt" "$PEGASUS_THEME_DIR/steam/metadata.txt"
+        PEGASUS_FLATPAK_CONFIG_DIR="$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus/config/pegasus-frontend"
 
-    # Copy Apps collection metadata
-    sudo mkdir -p "$PEGASUS_THEME_DIR/apps"
-    sudo cp "${TPL_DIR}/pegasus/collections/apps/metadata.txt" "$PEGASUS_THEME_DIR/apps/metadata.txt"
+        PEGASUS_FLATPAK_THEME_DIR="$PEGASUS_FLATPAK_CONFIG_DIR/themes"
 
-    # Theme installation skipped for now
-    echo "Theme installation skipped - will use default theme."
+        sudo mkdir -p "$PEGASUS_FLATPAK_CONFIG_DIR" "$PEGASUS_FLATPAK_THEME_DIR"
 
-    # Setup Sway configuration
-    echo "Setting up Sway configuration for Kiosk mode..."
-    SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway"
-    sudo mkdir -p "$SWAY_CONFIG_DIR"
-    sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/config"
+    
 
-    sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
+        # Copy Pegasus settings
 
-    KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
-    # Always copy the launch script to ensure the latest version is used
-    echo "Setting up Pegasus launch script..."
-    sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
-    sudo chmod +x "$KIOSK_SCRIPT"
-    sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
+        sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_FLATPAK_CONFIG_DIR/settings.txt"
 
-    echo "Configuring display manager (greetd) for autologin..."
-    sudo mkdir -p "/etc/greetd"
-    AUTOLOGIN_CONF="/etc/greetd/config.toml"
-    echo '[initial_session]' | sudo tee "$AUTOLOGIN_CONF" > /dev/null
-    echo 'command = "sway"' | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-    echo 'user = "steam"' | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
+    
 
-    echo "Pegasus Kiosk setup complete!"
+        # Copy Steam collection metadata
+
+        sudo mkdir -p "$PEGASUS_FLATPAK_THEME_DIR/steam"
+
+        sudo cp "${TPL_DIR}/pegasus/collections/steam/metadata.txt" "$PEGASUS_FLATPAK_THEME_DIR/steam/metadata.txt"
+
+    
+
+        # Copy Apps collection metadata
+
+        sudo mkdir -p "$PEGASUS_FLATPAK_THEME_DIR/apps"
+
+        sudo cp "${TPL_DIR}/pegasus/collections/apps/metadata.txt" "$PEGASUS_FLATPAK_THEME_DIR/apps/metadata.txt"
+
+    
+
+        # Ensure ownership for the steam user
+
+        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus"
+
+        
+
+        # Setup Sway configuration
+
+        echo "Setting up Sway configuration for Kiosk mode..."
+
+        SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway"
+
+        sudo mkdir -p "$SWAY_CONFIG_DIR"
+
+        sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/config"
+
+    
+
+        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
+
+    
+
+        KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
+
+        # Always copy the launch script to ensure the latest version is used
+
+        echo "Setting up Pegasus launch script..."
+
+        sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
+
+        sudo chmod +x "$KIOSK_SCRIPT"
+
+        sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
+
+    
+
+        echo "Configuring display manager (SDDM) for autologin..."
+
+        sudo mkdir -p "/etc/sddm.conf.d/"
+
+        AUTOLOGIN_CONF="/etc/sddm.conf.d/autologin.conf"
+
+        echo "[Autologin]" | sudo tee "$AUTOLOGIN_CONF" > /dev/null
+
+        echo "User=$KIOSK_USER" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
+
+        echo "Session=sway" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
+
+        
+
+        # Clean up any previous greetd config
+
+        if [ -f "/etc/greetd/config.toml" ]; then
+
+            echo "Removing old greetd autologin config..."
+
+            sudo rm "/etc/greetd/config.toml"
+
+        fi
+
+    
+
+        # Clean up any previous getty override config
+
+        GETTY_OVERRIDE_CONF="/etc/systemd/system/getty@tty1.service.d/override.conf"
+
+        if [ -f "$GETTY_OVERRIDE_CONF" ]; then
+
+            echo "Removing old getty autologin override config..."
+
+            sudo rm "$GETTY_OVERRIDE_CONF"
+
+            sudo rmdir "$(dirname "$GETTY_OVERRIDE_CONF")" || true # Remove dir if empty
+
+        fi
+
+    
+
+        echo "Pegasus Kiosk setup complete!"
 
 setup-all:
     @ujust install-default-brew
