@@ -2,7 +2,6 @@
 source-config:
     #!/usr/bin/env bash
     set -euo pipefail
-
     # Source the service definitions
     set -a
     if [ -f /usr/etc/bos/media_server/config.sh ]; then
@@ -14,16 +13,13 @@ source-config:
 setup-caddy:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     # Source config with auto-export
     set -a && source /usr/etc/bos/media_server/config.sh && set +a
-
     echo "Initializing Caddy user and directories..."
     sudo mkdir -p /var/opt/caddy/config /var/opt/caddy/data
     if ! getent group caddy >/dev/null; then sudo groupadd --system --gid 82 caddy; fi
     if ! getent passwd caddy >/dev/null; then sudo useradd --system --gid caddy --uid 82 --no-create-home --shell /bin/false caddy; fi
     sudo chown -R caddy:caddy /var/opt/caddy
-
     echo "Getting Tailscale IP..."
     if ! MEDIA_SERVER_IP=$(sudo tailscale ip -4 2>/dev/null); then
         echo "Error: Failed to get Tailscale IP. Is Tailscale running?"
@@ -31,13 +27,11 @@ setup-caddy:
     fi
     echo "Found Tailscale IP: ${MEDIA_SERVER_IP}"
     export MEDIA_SERVER_IP
-
     echo "Generating Caddyfile..."
     TPL_DIR="/usr/etc/bos/media_server_templates"
     sudo mkdir -p /etc/caddy
     sudo -E envsubst < "${TPL_DIR}/Caddyfile.tpl" > /etc/caddy/Caddyfile
     sudo chown -R caddy:caddy /etc/caddy
-
     echo "Copying Caddy quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "${TPL_DIR}/caddy.container" /etc/containers/systemd/
@@ -46,7 +40,6 @@ setup-caddy:
 setup-dashboard:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Setting up dashboard..."
     sudo mkdir -p /var/www
     sudo cp -r /usr/share/www/dashboard /var/www/
@@ -58,17 +51,14 @@ setup-dashboard:
 setup-dnsmasq:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     # Source config with auto-export
     set -a && source /usr/etc/bos/media_server/config.sh && set +a
-
     echo "Initializing dnsmasq user and directories..."
     sudo mkdir -p /var/opt/dnsmasq/dnsmasq.d
     sudo touch /var/opt/dnsmasq/dnsmasq.custom
     if ! getent group dnsmasq >/dev/null; then sudo groupadd --system --gid 99 dnsmasq; fi
     if ! getent passwd dnsmasq >/dev/null; then sudo useradd --system --gid dnsmasq --uid 99 --no-create-home --shell /bin/false dnsmasq; fi
     sudo chown -R dnsmasq:dnsmasq /var/opt/dnsmasq
-
     echo "Getting Tailscale IP..."
     if ! MEDIA_SERVER_IP=$(sudo tailscale ip -4 2>/dev/null); then
         echo "Error: Failed to get Tailscale IP. Is Tailscale running?"
@@ -76,7 +66,6 @@ setup-dnsmasq:
     fi
     echo "Found Tailscale IP: ${MEDIA_SERVER_IP}"
     export MEDIA_SERVER_IP
-
     echo "Generating dnsmasq hosts config..."
     TPL_DIR="/usr/etc/bos/media_server_templates"
     sudo mkdir -p /opt/dnsmasq/dnsmasq.d
@@ -87,7 +76,6 @@ setup-dnsmasq:
         echo "address=/${domain}/${MEDIA_SERVER_IP}" | sudo tee -a "${DNSMASQ_CONF_PATH}" > /dev/null
     done
     sudo chown -R dnsmasq:dnsmasq /opt/dnsmasq
-
     echo "Copying dnsmasq quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo -E envsubst < "${TPL_DIR}/dnsmasq.container.tpl" > /etc/containers/systemd/dnsmasq.container
@@ -96,7 +84,6 @@ setup-dnsmasq:
 _ensure-serverstorage-group:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing serverstorage group..."
     if ! getent group serverstorage >/dev/null; then sudo groupadd --system --gid 1003 serverstorage; fi
 
@@ -104,7 +91,6 @@ _ensure-serverstorage-group:
 setup-jellyfin: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Jellyfin user and directories..."
     sudo mkdir -p /var/opt/jellyfin/config /var/opt/jellyfin/cache
     if ! getent group jellyfin >/dev/null; then sudo groupadd --system --gid 1002 jellyfin; fi
@@ -114,10 +100,8 @@ setup-jellyfin: _ensure-serverstorage-group
         sudo cp /etc/jellyfin/authentication.xml /var/opt/jellyfin/config/authentication.xml
         sudo chown jellyfin:jellyfin /var/opt/jellyfin/config/authentication.xml
     fi
-
     echo "Adding jellyfin to serverstorage group..."
     sudo usermod -aG serverstorage jellyfin
-
     echo "Copying Jellyfin quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/jellyfin.container" /etc/containers/systemd/
@@ -126,7 +110,6 @@ setup-jellyfin: _ensure-serverstorage-group
 setup-filebrowser: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing File Browser user and directories..."
     sudo mkdir -p /var/opt/filebrowser
     sudo mkdir -p /var/opt/filebrowser/config
@@ -134,10 +117,8 @@ setup-filebrowser: _ensure-serverstorage-group
     if ! getent group filebrowser >/dev/null; then sudo groupadd --system --gid 1001 filebrowser; fi
     if ! getent passwd filebrowser >/dev/null; then sudo useradd --system --gid filebrowser --uid 1001 --no-create-home --shell /bin/false filebrowser; fi
     sudo chown -R filebrowser:filebrowser /var/opt/filebrowser
-
     echo "Adding filebrowser to serverstorage group..."
     sudo usermod -aG serverstorage filebrowser
-
     echo "Copying File Browser quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/filebrowser.container" /etc/containers/systemd/
@@ -146,22 +127,17 @@ setup-filebrowser: _ensure-serverstorage-group
 setup-beszel:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     # Source config with auto-export
     set -a && source /usr/etc/bos/media_server/config.sh && set +a
-
     TPL_DIR="/usr/etc/bos/media_server_templates"
-
     echo "Initializing Beszel user and directories..."
     sudo mkdir -p /var/opt/beszel/data
     if ! getent group beszel >/dev/null; then sudo groupadd --system --gid 1004 beszel; fi
     if ! getent passwd beszel >/dev/null; then sudo useradd --system --gid beszel --uid 1004 --no-create-home --shell /bin/false beszel; fi
     sudo chown -R beszel:beszel /var/opt/beszel
-
     echo "Copying Beszel quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/beszel.container" /etc/containers/systemd/
-
     echo "Configuring Beszel Agent service patterns..."
     AGENT_SERVICE_FILE="/etc/systemd/system/beszel-agent.service"
     if [ -f "${AGENT_SERVICE_FILE}" ]; then
@@ -175,14 +151,11 @@ setup-beszel:
 setup-metube: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Metube user and directories..."
     if ! getent group metube >/dev/null; then sudo groupadd --system --gid 1006 metube; fi
     if ! getent passwd metube >/dev/null; then sudo useradd --system --gid metube --uid 1006 --no-create-home --shell /bin/false metube; fi
-
     echo "Adding metube to serverstorage group..."
     sudo usermod -aG serverstorage metube
-
     echo "Copying Metube quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/metube.container" /etc/containers/systemd/
@@ -191,16 +164,13 @@ setup-metube: _ensure-serverstorage-group
 setup-fsqd: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing fsqd user and directories..."
     sudo mkdir -p /var/opt/fsqd/data
     if ! getent group fsqd >/dev/null; then sudo groupadd --system --gid 1008 fsqd; fi
     if ! getent passwd fsqd >/dev/null; then sudo useradd --system --gid fsqd --uid 1008 --no-create-home --shell /bin/false fsqd; fi
     sudo chown -R fsqd:fsqd /var/opt/fsqd
-
     echo "Adding fsqd to serverstorage group..."
     sudo usermod -aG serverstorage fsqd
-
     echo "Copying fsqd quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/fsqd.container" /etc/containers/systemd/
@@ -209,14 +179,11 @@ setup-fsqd: _ensure-serverstorage-group
 setup-samba: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Samba user and directories..."
     if ! getent group samba >/dev/null; then sudo groupadd --system --gid 1007 samba; fi
     if ! getent passwd samba >/dev/null; then sudo useradd --system --gid samba --uid 1007 --no-create-home --shell /bin/false samba; fi
-
     echo "Adding samba to serverstorage group..."
     sudo usermod -aG serverstorage samba
-
     echo "Copying Samba quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/samba.container" /etc/containers/systemd/
@@ -225,21 +192,17 @@ setup-samba: _ensure-serverstorage-group
 setup-audiobookshelf: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Audiobookshelf user and directories..."
     sudo mkdir -p /var/opt/audiobookshelf/config /var/opt/audiobookshelf/metadata
     if ! getent group audiobookshelf >/dev/null; then sudo groupadd --system --gid 1009 audiobookshelf; fi
     if ! getent passwd audiobookshelf >/dev/null; then sudo useradd --system --gid audiobookshelf --uid 1009 --no-create-home --shell /bin/false audiobookshelf; fi
     sudo chown -R audiobookshelf:audiobookshelf /var/opt/audiobookshelf
-
     echo "Adding audiobookshelf to serverstorage group..."
     sudo usermod -aG serverstorage audiobookshelf
-
     echo "Creating and setting permissions for audiobooks directory..."
     sudo mkdir -p /var/server_storage/audiobooks
     sudo chown -R audiobookshelf:serverstorage /var/server_storage/audiobooks
     sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage/audiobooks
-
     echo "Copying Audiobookshelf quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/audiobookshelf.container" /etc/containers/systemd/
@@ -248,16 +211,13 @@ setup-audiobookshelf: _ensure-serverstorage-group
 setup-sonarr: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Sonarr user and directories..."
     sudo mkdir -p /var/opt/sonarr/config
     if ! getent group sonarr >/dev/null; then sudo groupadd --system --gid 1011 sonarr; fi
     if ! getent passwd sonarr >/dev/null; then sudo useradd --system --gid sonarr --uid 1011 --no-create-home --shell /bin/false sonarr; fi
     sudo chown -R sonarr:sonarr /var/opt/sonarr
-
     echo "Adding sonarr to serverstorage group..."
     sudo usermod -aG serverstorage sonarr
-
     echo "Copying Sonarr quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/sonarr.container" /etc/containers/systemd/
@@ -266,16 +226,13 @@ setup-sonarr: _ensure-serverstorage-group
 setup-radarr: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Radarr user and directories..."
     sudo mkdir -p /var/opt/radarr/config
     if ! getent group radarr >/dev/null; then sudo groupadd --system --gid 1012 radarr; fi
     if ! getent passwd radarr >/dev/null; then sudo useradd --system --gid radarr --uid 1012 --no-create-home --shell /bin/false radarr; fi
     sudo chown -R radarr:radarr /var/opt/radarr
-
     echo "Adding radarr to serverstorage group..."
     sudo usermod -aG serverstorage radarr
-
     echo "Copying Radarr quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/radarr.container" /etc/containers/systemd/
@@ -284,10 +241,8 @@ setup-radarr: _ensure-serverstorage-group
 setup-gluetun:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing Gluetun directories..."
     sudo mkdir -p /var/opt/gluetun
-
     CREDENTIALS_FILE="/var/opt/gluetun/credentials.env"
     if [ -f "$CREDENTIALS_FILE" ]; then
         if gum confirm "Gluetun credentials already exist. Do you want to update them?"; then
@@ -310,7 +265,6 @@ setup-gluetun:
         sudo chmod 600 "$CREDENTIALS_FILE"
         echo "Credentials saved securely to $CREDENTIALS_FILE"
     fi
-
     echo "Copying Gluetun quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/gluetun.container" /etc/containers/systemd/
@@ -319,14 +273,12 @@ setup-gluetun:
 setup-qbittorrent: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Initializing qBittorrent user and directories..."
     sudo mkdir -p /var/opt/qbittorrent/config
     sudo mkdir -p /var/opt/qbittorrent/vuetorrent
     if ! getent group qbittorrent >/dev/null; then sudo groupadd --system --gid 1010 qbittorrent; fi
     if ! getent passwd qbittorrent >/dev/null; then sudo useradd --system --gid qbittorrent --uid 1010 --no-create-home --shell /bin/false qbittorrent; fi
     sudo chown -R qbittorrent:qbittorrent /var/opt/qbittorrent
-
     echo "Downloading VueTorrent UI..."
     VUETRENT_URL=$(curl -sfL "https://api.github.com/repos/WDaan/VueTorrent/releases/latest" | grep -o '"browser_download_url": "[^"]*\.zip"' | grep -v 'legacy' | head -1 | cut -d'"' -f4)
     if [ -n "$VUETRENT_URL" ]; then
@@ -341,15 +293,12 @@ setup-qbittorrent: _ensure-serverstorage-group
     else
         echo "Warning: Could not download VueTorrent. Using default WebUI."
     fi
-
     echo "Adding qbittorrent to serverstorage group..."
     sudo usermod -aG serverstorage qbittorrent
-
     echo "Copying qBittorrent scripts..."
     sudo mkdir -p /var/opt/scripts
     sudo cp "/usr/etc/bos/media_server_templates/scripts/wait-for-vpn.sh" /var/opt/scripts/
     sudo chmod +x /var/opt/scripts/wait-for-vpn.sh
-
     echo "Copying qBittorrent quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/qbittorrent.container" /etc/containers/systemd/
@@ -358,19 +307,15 @@ setup-qbittorrent: _ensure-serverstorage-group
 setup-server-storage: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-
     if [ ! -d /var/server_storage ]; then
         echo "Creating Btrfs subvolume at /var/server_storage..."
         sudo btrfs subvolume create /var/server_storage
     fi
-
     echo "Creating storage directories..."
     sudo mkdir -p /var/server_storage/media /var/server_storage/games /var/server_storage/downloads
-
     echo "Setting permissions for storage directories..."
     sudo chown -R filebrowser:serverstorage /var/server_storage
     sudo chmod -R u=rwX,g=rwsX,o-rwx /var/server_storage
-
     echo "Initializing WWW directory..."
     sudo mkdir -p /var/www
     if [ -d "/usr/share/www" ]; then
@@ -381,10 +326,8 @@ setup-server-storage: _ensure-serverstorage-group
 setup-media-services:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     echo "Setting up media services..."
     echo "This will configure Jellyfin, Caddy, and other media services."
-
     ujust setup-server-storage
     ujust setup-caddy
     ujust setup-dnsmasq
@@ -399,7 +342,6 @@ setup-media-services:
     ujust setup-qbittorrent
     ujust setup-sonarr
     ujust setup-radarr
-
     ujust restart-media-services
     echo "Media services setup complete!"
 
@@ -407,7 +349,6 @@ setup-media-services:
 setup-media-services-interactive:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     choices=$(gum choose --no-limit \
         "setup-server-storage" \
         "setup-caddy" \
@@ -423,11 +364,9 @@ setup-media-services-interactive:
         "setup-qbittorrent" \
         "setup-sonarr" \
         "setup-radarr")
-
     for choice in $choices; do
         ujust $choice
     done
-
     ujust restart-media-services
     echo "Selected media services setup complete!"
 
@@ -437,13 +376,11 @@ restart-media-services:
     set -euxo pipefail
     echo "Restarting media services..."
     sudo systemctl daemon-reload
-
     # Stop VPN-dependent services first (so gluetun can restart)
     echo "Stopping VPN-dependent services..."
     sudo systemctl stop qbittorrent.service || true
     sudo systemctl stop sonarr.service || true
     sudo systemctl stop radarr.service || true
-
     # Restart non-VPN services
     sudo systemctl restart dnsmasq.service || true
     sudo systemctl restart caddy.service || true
@@ -454,7 +391,6 @@ restart-media-services:
     sudo systemctl restart samba.service || true
     sudo systemctl restart fsqd.service || true
     sudo systemctl restart audiobookshelf.service || true
-
     # Restart gluetun
     echo "Restarting gluetun VPN..."
     if sudo systemctl restart gluetun.service; then
@@ -466,17 +402,14 @@ restart-media-services:
         echo "ERROR: gluetun failed to restart. VPN-dependent services (qbittorrent, sonarr, radarr) are stopped."
         exit 1
     fi
-
     echo "Media services restarted!"
 
 [group('Setup')]
 setup-pegasus-kiosk:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     TPL_DIR="/usr/etc/bos/media_server_templates"
     KIOSK_USER="steam"
-
     # Create steam user first (before using their home directory)
     if ! id "$KIOSK_USER" &>/dev/null; then
         echo "Creating user '$KIOSK_USER'..."
@@ -486,18 +419,15 @@ setup-pegasus-kiosk:
     else
         echo "User '$KIOSK_USER' already exists. Skipping creation."
     fi
-
     # Get actual home directory (handles /home vs /var/home)
     STEAM_HOME=$(getent passwd "$KIOSK_USER" | cut -d: -f6)
     echo "Steam home directory: $STEAM_HOME"
-
     # Ensure home directory exists and is owned by steam user
     if [ ! -d "$STEAM_HOME" ]; then
         echo "Creating home directory $STEAM_HOME..."
         sudo mkdir -p "$STEAM_HOME"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME"
     fi
-
     # Install Pegasus from Flathub
     echo "Installing Pegasus frontend from Flathub..."
     if ! flatpak list --system | grep -q org.pegasus_frontend.Pegasus; then
@@ -515,119 +445,51 @@ setup-pegasus-kiosk:
     else
         echo "Pegasus already installed."
     fi
-
         # Setup Pegasus configuration (Flatpak specific)
-
         echo "Setting up Pegasus Flatpak configuration..."
-
         PEGASUS_FLATPAK_CONFIG_DIR="$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus/config/pegasus-frontend"
-
         PEGASUS_FLATPAK_THEME_DIR="$PEGASUS_FLATPAK_CONFIG_DIR/themes"
-
         sudo mkdir -p "$PEGASUS_FLATPAK_CONFIG_DIR" "$PEGASUS_FLATPAK_THEME_DIR"
-
-    
-
         # Copy Pegasus settings
-
         sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_FLATPAK_CONFIG_DIR/settings.txt"
-
-    
-
         # Copy Steam collection metadata
-
         sudo mkdir -p "$PEGASUS_FLATPAK_THEME_DIR/steam"
-
         sudo cp "${TPL_DIR}/pegasus/collections/steam/metadata.txt" "$PEGASUS_FLATPAK_THEME_DIR/steam/metadata.txt"
-
-    
-
         # Copy Apps collection metadata
-
         sudo mkdir -p "$PEGASUS_FLATPAK_THEME_DIR/apps"
-
         sudo cp "${TPL_DIR}/pegasus/collections/apps/metadata.txt" "$PEGASUS_FLATPAK_THEME_DIR/apps/metadata.txt"
-
-    
-
         # Ensure ownership for the steam user
-
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus"
-
-        
-
         # Setup Sway configuration
-
         echo "Setting up Sway configuration for Kiosk mode..."
-
         SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway"
-
         sudo mkdir -p "$SWAY_CONFIG_DIR"
-
         sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/config"
-
-    
-
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
-
-    
-
         KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
-
         # Always copy the launch script to ensure the latest version is used
-
         echo "Setting up Pegasus launch script..."
-
         sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
-
         sudo chmod +x "$KIOSK_SCRIPT"
-
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
-
-    
-
         echo "Configuring display manager (SDDM) for autologin..."
-
         sudo mkdir -p "/etc/sddm.conf.d/"
-
         AUTOLOGIN_CONF="/etc/sddm.conf.d/autologin.conf"
-
         echo "[Autologin]" | sudo tee "$AUTOLOGIN_CONF" > /dev/null
-
         echo "User=$KIOSK_USER" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-
         echo "Session=sway" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-
-        
-
         # Clean up any previous greetd config
-
         if [ -f "/etc/greetd/config.toml" ]; then
-
             echo "Removing old greetd autologin config..."
-
             sudo rm "/etc/greetd/config.toml"
-
         fi
-
-    
-
         # Clean up any previous getty override config
-
         GETTY_OVERRIDE_CONF="/etc/systemd/system/getty@tty1.service.d/override.conf"
-
         if [ -f "$GETTY_OVERRIDE_CONF" ]; then
-
             echo "Removing old getty autologin override config..."
-
             sudo rm "$GETTY_OVERRIDE_CONF"
-
             sudo rmdir "$(dirname "$GETTY_OVERRIDE_CONF")" || true # Remove dir if empty
-
         fi
-
-    
-
         echo "Pegasus Kiosk setup complete!"
 
 setup-all:
@@ -643,7 +505,6 @@ setup-all:
 setup-interactive:
     #!/usr/bin/env bash
     set -euxo pipefail
-
     choices=$(gum choose --no-limit \
         "install-default-brew" \
         "install-default-flatpaks" \
@@ -654,7 +515,6 @@ setup-interactive:
         "setup-tailscale" \
         "setup-media-services-interactive" \
         "setup-pegasus-kiosk")
-
     for choice in $choices; do
         ujust $choice
     done
