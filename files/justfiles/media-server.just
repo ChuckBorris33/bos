@@ -452,6 +452,8 @@ setup-pegasus-kiosk:
         sudo mkdir -p "$PEGASUS_FLATPAK_CONFIG_DIR" "$PEGASUS_FLATPAK_THEME_DIR"
         # Copy Pegasus settings
         sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_FLATPAK_CONFIG_DIR/settings.txt"
+        # Copy Pegasus collections (apps, steam, etc.)
+        sudo cp -r "${TPL_DIR}/pegasus/collections" "$PEGASUS_FLATPAK_CONFIG_DIR/"
             # Theme installation skipped for now to avoid incorrect configuration.
             # Pegasus will use its default theme.
 
@@ -471,8 +473,9 @@ setup-pegasus-kiosk:
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
         # Install desktop file for manual launch
         echo "Installing Pegasus desktop entry..."
-        sudo mkdir -p /usr/share/applications
-        sudo cp "${TPL_DIR}/pegasus-gamescope.desktop" /usr/share/applications/
+        sudo mkdir -p "$STEAM_HOME/.local/share/applications"
+        sudo cp "${TPL_DIR}/pegasus-gamescope.desktop" "$STEAM_HOME/.local/share/applications/"
+        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.local"
         echo "Configuring display manager (SDDM) for autologin..."
         sudo mkdir -p "/etc/sddm.conf.d/"
         AUTOLOGIN_CONF="/etc/sddm.conf.d/autologin.conf"

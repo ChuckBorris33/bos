@@ -6,11 +6,14 @@ set $mod Mod4
 # Set background
 output * bg /usr/share/backgrounds/default.jpg fill
 
+# Force Full HD resolution
+output * resolution 1920x1080
+
 # font for window titles
 font pango:monospace 10
 
 # Autostart Pegasus in gamescope
-exec ~/start_pegasus_kiosk.sh
+exec $HOME/start_pegasus_kiosk.sh
 
 # Make all new windows fullscreen
 for_window [class=".*"] fullscreen
