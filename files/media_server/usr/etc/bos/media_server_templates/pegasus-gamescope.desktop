@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Pegasus (Gamescope)
+Comment=Gaming frontend running in Gamescope
+Exec=/home/steam/start_pegasus_kiosk.sh
+Type=Application
+Terminal=false
+Categories=Game;
+Icon=org.pegasus_frontend.Pegasus

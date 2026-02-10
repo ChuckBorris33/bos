@@ -459,9 +459,9 @@ setup-pegasus-kiosk:
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus"
         # Setup Sway configuration
         echo "Setting up Sway configuration for Kiosk mode..."
-        SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway"
+        SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway/config.d"
         sudo mkdir -p "$SWAY_CONFIG_DIR"
-        sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/config"
+        sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/99-custom-config.conf"
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
         KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
         # Always copy the launch script to ensure the latest version is used
@@ -469,24 +469,16 @@ setup-pegasus-kiosk:
         sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
         sudo chmod +x "$KIOSK_SCRIPT"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
+        # Install desktop file for manual launch
+        echo "Installing Pegasus desktop entry..."
+        sudo mkdir -p /usr/share/applications
+        sudo cp "${TPL_DIR}/pegasus-gamescope.desktop" /usr/share/applications/
         echo "Configuring display manager (SDDM) for autologin..."
         sudo mkdir -p "/etc/sddm.conf.d/"
         AUTOLOGIN_CONF="/etc/sddm.conf.d/autologin.conf"
         echo "[Autologin]" | sudo tee "$AUTOLOGIN_CONF" > /dev/null
         echo "User=$KIOSK_USER" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
         echo "Session=sway" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-        # Clean up any previous greetd config
-        if [ -f "/etc/greetd/config.toml" ]; then
-            echo "Removing old greetd autologin config..."
-            sudo rm "/etc/greetd/config.toml"
-        fi
-        # Clean up any previous getty override config
-        GETTY_OVERRIDE_CONF="/etc/systemd/system/getty@tty1.service.d/override.conf"
-        if [ -f "$GETTY_OVERRIDE_CONF" ]; then
-            echo "Removing old getty autologin override config..."
-            sudo rm "$GETTY_OVERRIDE_CONF"
-            sudo rmdir "$(dirname "$GETTY_OVERRIDE_CONF")" || true # Remove dir if empty
-        fi
         echo "Pegasus Kiosk setup complete!"
 
 setup-all:

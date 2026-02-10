@@ -1,4 +1,0 @@
-# If running on tty1, and no X/Wayland session is running, start Sway.
-if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-  exec sway
-fi
