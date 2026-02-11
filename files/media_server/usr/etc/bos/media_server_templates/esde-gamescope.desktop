@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ES-DE (Gamescope)
+Comment=EmulationStation Desktop Edition running in Gamescope
+Exec=/home/steam/start_esde_kiosk.sh
+Type=Application
+Terminal=false
+Categories=Game;Emulator;
+Icon=es-de

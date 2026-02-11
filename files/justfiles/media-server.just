@@ -405,7 +405,7 @@ restart-media-services:
     echo "Media services restarted!"
 
 [group('Setup')]
-setup-pegasus-kiosk:
+setup-esde-kiosk:
     #!/usr/bin/env bash
     set -euxo pipefail
     TPL_DIR="/usr/etc/bos/media_server_templates"
@@ -428,53 +428,31 @@ setup-pegasus-kiosk:
         sudo mkdir -p "$STEAM_HOME"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME"
     fi
-    # Install Pegasus from Flathub
-    echo "Installing Pegasus frontend from Flathub..."
-    if ! flatpak list --system | grep -q org.pegasus_frontend.Pegasus; then
-        # Enable flathub if disabled
-        if flatpak remotes --system | grep -q "^flathub.*disabled"; then
-            echo "Enabling flathub remote..."
-            sudo flatpak remote-modify --system --enable flathub
-        fi
-        # Add flathub if not present
-        if ! flatpak remotes --system | grep -q "^flathub"; then
-            echo "Adding flathub remote..."
-            sudo flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        fi
-        sudo flatpak install flathub org.pegasus_frontend.Pegasus --system -y
-    else
-        echo "Pegasus already installed."
+    # Check that ES-DE is installed (expected to be installed from terra repo)
+    echo "Checking ES-DE installation..."
+    if ! command -v es-de &>/dev/null; then
+        echo "WARNING: ES-DE (es-de command) not found in PATH."
+        echo "Please ensure ES-DE is installed from the terra repository."
+        echo "Install with: sudo dnf install es-de"
+        exit 1
     fi
-        # Setup Pegasus configuration (Flatpak specific)
-        echo "Setting up Pegasus Flatpak configuration..."
-        PEGASUS_FLATPAK_CONFIG_DIR="$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus/config/pegasus-frontend"
-        PEGASUS_FLATPAK_THEME_DIR="$PEGASUS_FLATPAK_CONFIG_DIR/themes"
-        sudo mkdir -p "$PEGASUS_FLATPAK_CONFIG_DIR" "$PEGASUS_FLATPAK_THEME_DIR"
-        # Copy Pegasus settings
-        sudo cp "${TPL_DIR}/pegasus/settings.txt" "$PEGASUS_FLATPAK_CONFIG_DIR/settings.txt"
-        # Copy Pegasus collections (apps, steam, etc.)
-        sudo cp -r "${TPL_DIR}/pegasus/collections" "$PEGASUS_FLATPAK_CONFIG_DIR/"
-            # Theme installation skipped for now to avoid incorrect configuration.
-            # Pegasus will use its default theme.
-
-        # Ensure ownership for the steam user
-        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.var/app/org.pegasus_frontend.Pegasus"
+    echo "ES-DE found: $(which es-de)"
         # Setup Sway configuration
         echo "Setting up Sway configuration for Kiosk mode..."
         SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway/config.d"
         sudo mkdir -p "$SWAY_CONFIG_DIR"
         sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/99-custom-config.conf"
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
-        KIOSK_SCRIPT="$STEAM_HOME/start_pegasus_kiosk.sh"
+        KIOSK_SCRIPT="$STEAM_HOME/start_esde_kiosk.sh"
         # Always copy the launch script to ensure the latest version is used
-        echo "Setting up Pegasus launch script..."
-        sudo cp "${TPL_DIR}/start_pegasus_kiosk.sh" "$KIOSK_SCRIPT"
+        echo "Setting up ES-DE launch script..."
+        sudo cp "${TPL_DIR}/start_esde_kiosk.sh" "$KIOSK_SCRIPT"
         sudo chmod +x "$KIOSK_SCRIPT"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
         # Install desktop file for manual launch
-        echo "Installing Pegasus desktop entry..."
+        echo "Installing ES-DE desktop entry..."
         sudo mkdir -p "$STEAM_HOME/.local/share/applications"
-        sudo cp "${TPL_DIR}/pegasus-gamescope.desktop" "$STEAM_HOME/.local/share/applications/"
+        sudo cp "${TPL_DIR}/esde-gamescope.desktop" "$STEAM_HOME/.local/share/applications/"
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.local"
         echo "Configuring display manager (SDDM) for autologin..."
         sudo mkdir -p "/etc/sddm.conf.d/"
@@ -482,7 +460,7 @@ setup-pegasus-kiosk:
         echo "[Autologin]" | sudo tee "$AUTOLOGIN_CONF" > /dev/null
         echo "User=$KIOSK_USER" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
         echo "Session=sway" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-        echo "Pegasus Kiosk setup complete!"
+        echo "ES-DE Kiosk setup complete!"
 
 setup-all:
     @ujust install-default-brew
@@ -506,7 +484,7 @@ setup-interactive:
         "set-default-shell" \
         "setup-tailscale" \
         "setup-media-services-interactive" \
-        "setup-pegasus-kiosk")
+        "setup-esde-kiosk")
     for choice in $choices; do
         ujust $choice
     done

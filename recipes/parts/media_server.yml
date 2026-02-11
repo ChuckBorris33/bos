@@ -19,6 +19,14 @@ modules:
       - system.just
       - media-server.just
     validate: true
+  - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
+    install:
+      packages:
+        - es-de
   - type: brewfiles
     source: local
     include:
@@ -29,8 +37,7 @@ modules:
       - scope: user
         repo:
           title: Flathub (user)
-        install:
-          - org.pegasus_frontend.Pegasus
+        install: []
   - type: script
     scripts:
       - "install_steam.sh"

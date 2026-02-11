@@ -1,4 +1,4 @@
-# Sway configuration for Pegasus Kiosk
+# Sway configuration for ES-DE Kiosk
 
 # Set Win key as mod
 set $mod Mod4
@@ -12,20 +12,11 @@ output * resolution 1920x1080
 # font for window titles
 font pango:monospace 10
 
-# Autostart Pegasus in gamescope
-exec $HOME/start_pegasus_kiosk.sh
+# Autostart ES-DE in gamescope
+exec $HOME/start_esde_kiosk.sh
 
 # Make all new windows fullscreen
 for_window [class=".*"] fullscreen
-
-# toggle fullscreen
-bindsym $mod+f fullscreen
-
-# kill focused window (for debugging)
-bindsym $mod+Shift+q kill
-
-# reload config (for debugging)
-bindsym $mod+Shift+c reload
 
 # disable exit
 bindsym $mod+Shift+e mode "default"
