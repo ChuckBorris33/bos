@@ -428,6 +428,9 @@ setup-esde-kiosk:
         sudo mkdir -p "$STEAM_HOME"
         sudo chown "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME"
     fi
+    # Add steam user to serverstorage group for media access
+    echo "Adding $KIOSK_USER to serverstorage group..."
+    sudo usermod -aG serverstorage "$KIOSK_USER"
     # Check that ES-DE is installed (expected to be installed from terra repo)
     echo "Checking ES-DE installation..."
     if ! command -v es-de &>/dev/null; then
@@ -443,6 +446,11 @@ setup-esde-kiosk:
         sudo mkdir -p "$SWAY_CONFIG_DIR"
         sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/99-custom-config.conf"
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
+        # Copy ES-DE settings from template
+        echo "Copying ES-DE settings..."
+        sudo mkdir -p "$STEAM_HOME/ES-DE/settings"
+        sudo cp "${TPL_DIR}/es-settings.xml" "$STEAM_HOME/.config/ES-DE/settings/"
+        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/ES-DE"
         KIOSK_SCRIPT="$STEAM_HOME/start_esde_kiosk.sh"
         # Always copy the launch script to ensure the latest version is used
         echo "Setting up ES-DE launch script..."
