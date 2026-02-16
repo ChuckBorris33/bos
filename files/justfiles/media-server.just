@@ -449,7 +449,7 @@ setup-esde-kiosk:
         # Copy ES-DE settings from template
         echo "Copying ES-DE settings..."
         sudo mkdir -p "$STEAM_HOME/ES-DE/settings"
-        sudo cp "${TPL_DIR}/es-settings.xml" "$STEAM_HOME/.config/ES-DE/settings/"
+        sudo cp "${TPL_DIR}/es-settings.xml" "$STEAM_HOME/ES-DE/settings/"
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/ES-DE"
         KIOSK_SCRIPT="$STEAM_HOME/start_esde_kiosk.sh"
         # Always copy the launch script to ensure the latest version is used
@@ -468,6 +468,25 @@ setup-esde-kiosk:
         echo "[Autologin]" | sudo tee "$AUTOLOGIN_CONF" > /dev/null
         echo "User=$KIOSK_USER" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
         echo "Session=sway" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
+        # Update RetroArch config to enable core updater in menu
+        echo "Configuring RetroArch to show core updater..."
+        RETROARCH_CONFIG="$STEAM_HOME/.config/retroarch/retroarch.cfg"
+        if [ -f "$RETROARCH_CONFIG" ]; then
+            if grep -q "menu_show_core_updater" "$RETROARCH_CONFIG"; then
+                sudo sed -i 's/menu_show_core_updater = ".*"/menu_show_core_updater = "true"/' "$RETROARCH_CONFIG"
+            else
+                echo 'menu_show_core_updater = "true"' | sudo tee -a "$RETROARCH_CONFIG" > /dev/null
+            fi
+            if grep -q "menu_show_online_updater" "$RETROARCH_CONFIG"; then
+                sudo sed -i 's/menu_show_online_updater = ".*"/menu_show_online_updater = "true"/' "$RETROARCH_CONFIG"
+            else
+                echo 'menu_show_online_updater = "true"' | sudo tee -a "$RETROARCH_CONFIG" > /dev/null
+            fi
+            sudo chown "$KIOSK_USER:$KIOSK_USER" "$RETROARCH_CONFIG"
+        else
+            echo "WARNING: RetroArch config not found at $RETROARCH_CONFIG"
+            echo "Please ensure RetroArch is installed."
+        fi
         echo "ES-DE Kiosk setup complete!"
 
 setup-all:

@@ -23,3 +23,18 @@ bindsym $mod+Shift+e mode "default"
 
 # Remove title bars
 default_border none
+
+# Hide cursor globally (1ms timeout = effectively always hidden)
+seat seat0 hide_cursor 1
+
+# Hide cursor in specific applications
+for_window [class=".*es-de.*"] seat seat0 hide_cursor 1
+for_window [app_id=".*es-de.*"] seat seat0 hide_cursor 1
+for_window [class="gamescope"] seat seat0 hide_cursor 1
+for_window [app_id="gamescope"] seat seat0 hide_cursor 1
+for_window [class="retroarch"] seat seat0 hide_cursor 1
+for_window [app_id="retroarch"] seat seat0 hide_cursor 1
+for_window [class="Steam"] seat seat0 hide_cursor 1
+for_window [app_id="Steam"] seat seat0 hide_cursor 1
+for_window [class="steam"] seat seat0 hide_cursor 1
+for_window [app_id="steam"] seat seat0 hide_cursor 1
