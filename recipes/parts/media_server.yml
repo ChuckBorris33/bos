@@ -24,15 +24,12 @@ modules:
       cleanup: true
       files:
         - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
-      copr:
-        - yohane-shiro
     install:
       packages:
         - evtest
         - joystick
         - es-de
         - retroarch
-        - joystickwake
   - type: brewfiles
     source: local
     include:

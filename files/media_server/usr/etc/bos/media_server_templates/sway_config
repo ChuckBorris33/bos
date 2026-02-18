@@ -18,14 +18,8 @@ exec $HOME/start_esde_kiosk.sh
 # Make all new windows fullscreen
 for_window [class=".*"] fullscreen
 
-# disable exit
-bindsym $mod+Shift+e mode "default"
-
 # Remove title bars
 default_border none
-
-# Hide cursor globally (1ms timeout = effectively always hidden)
-seat seat0 hide_cursor 1
 
 # Hide cursor in specific applications
 for_window [class=".*es-de.*"] seat seat0 hide_cursor 1
