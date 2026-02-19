@@ -3,6 +3,9 @@
 # Set Win key as mod
 set $mod Mod4
 
+# Set Alt key as alt
+set $alt Mod1
+
 # Set background
 output * bg /usr/share/backgrounds/default.jpg fill
 
@@ -32,3 +35,8 @@ for_window [class="Steam"] seat seat0 hide_cursor 1
 for_window [app_id="Steam"] seat seat0 hide_cursor 1
 for_window [class="steam"] seat seat0 hide_cursor 1
 for_window [app_id="steam"] seat seat0 hide_cursor 1
+
+# Shortcuts
+bindsym $alt+Shift+q kill
+bindsym $alt+d exec dmenu_run
+bindsym $alt+Delete exec makoctl dismiss --all

@@ -449,7 +449,7 @@ setup-esde-kiosk:
         # Copy ES-DE settings from template
         echo "Copying ES-DE settings..."
         sudo mkdir -p "$STEAM_HOME/ES-DE/settings"
-        sudo cp "${TPL_DIR}/es-settings.xml" "$STEAM_HOME/ES-DE/settings/"
+        sudo cp "${TPL_DIR}/es_settings.xml" "$STEAM_HOME/ES-DE/settings/"
         sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/ES-DE"
         KIOSK_SCRIPT="$STEAM_HOME/start_esde_kiosk.sh"
         # Always copy the launch script to ensure the latest version is used
