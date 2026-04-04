@@ -2,6 +2,7 @@
 Description=qBittorrent Daemon
 After=gluetun.service
 Wants=gluetun.service
+BindsTo=gluetun.service
 
 [Container]
 Image=lscr.io/linuxserver/qbittorrent:latest
@@ -20,7 +21,6 @@ Volume=/var/server_storage/downloads:/downloads:z
 
 [Service]
 Restart=on-failure
-ExecCondition=/var/opt/scripts/wait-for-vpn.sh
 
 [Install]
 WantedBy=multi-user.target

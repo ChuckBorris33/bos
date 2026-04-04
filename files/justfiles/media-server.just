@@ -295,10 +295,6 @@ setup-qbittorrent: _ensure-serverstorage-group
     fi
     echo "Adding qbittorrent to serverstorage group..."
     sudo usermod -aG serverstorage qbittorrent
-    echo "Copying qBittorrent scripts..."
-    sudo mkdir -p /var/opt/scripts
-    sudo cp "/usr/etc/bos/media_server_templates/scripts/wait-for-vpn.sh" /var/opt/scripts/
-    sudo chmod +x /var/opt/scripts/wait-for-vpn.sh
     echo "Copying qBittorrent quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/qbittorrent.container" /etc/containers/systemd/

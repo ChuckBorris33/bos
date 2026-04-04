@@ -2,6 +2,7 @@
 Description=Sonarr (TV Show Management)
 After=gluetun.service
 Wants=gluetun.service
+BindsTo=gluetun.service
 
 [Container]
 Image=lscr.io/linuxserver/sonarr:latest
