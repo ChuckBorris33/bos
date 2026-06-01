@@ -275,8 +275,22 @@ setup-flood-rtorrent: _ensure-serverstorage-group
     set -euxo pipefail
     echo "Initializing Flood-rtorrent user and directories..."
     sudo mkdir -p /var/opt/flood-rtorrent/config
-    if ! getent group flood-rtorrent >/dev/null; then sudo groupadd --system --gid 1010 flood-rtorrent; fi
-    if ! getent passwd flood-rtorrent >/dev/null; then sudo useradd --system --gid flood-rtorrent --uid 1010 --no-create-home --shell /bin/false flood-rtorrent; fi
+    if ! getent group flood-rtorrent >/dev/null; then
+        if getent group qbittorrent >/dev/null; then
+            echo "Renaming existing qbittorrent group to flood-rtorrent..."
+            sudo groupmod -n flood-rtorrent qbittorrent
+        else
+            sudo groupadd --system --gid 1010 flood-rtorrent
+        fi
+    fi
+    if ! getent passwd flood-rtorrent >/dev/null; then
+        if getent passwd qbittorrent >/dev/null; then
+            echo "Renaming existing qbittorrent user to flood-rtorrent..."
+            sudo usermod -l flood-rtorrent qbittorrent
+        else
+            sudo useradd --system --gid flood-rtorrent --uid 1010 --no-create-home --shell /bin/false flood-rtorrent
+        fi
+    fi
     sudo chown -R flood-rtorrent:flood-rtorrent /var/opt/flood-rtorrent
     echo "Adding flood-rtorrent to serverstorage group..."
     sudo usermod -aG serverstorage flood-rtorrent
