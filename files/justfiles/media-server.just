@@ -270,34 +270,19 @@ setup-gluetun:
     sudo cp "/usr/etc/bos/media_server_templates/gluetun.container" /etc/containers/systemd/
 
 [group('Setup')]
-setup-qbittorrent: _ensure-serverstorage-group
+setup-flood-rtorrent: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-    echo "Initializing qBittorrent user and directories..."
-    sudo mkdir -p /var/opt/qbittorrent/config
-    sudo mkdir -p /var/opt/qbittorrent/vuetorrent
-    if ! getent group qbittorrent >/dev/null; then sudo groupadd --system --gid 1010 qbittorrent; fi
-    if ! getent passwd qbittorrent >/dev/null; then sudo useradd --system --gid qbittorrent --uid 1010 --no-create-home --shell /bin/false qbittorrent; fi
-    sudo chown -R qbittorrent:qbittorrent /var/opt/qbittorrent
-    echo "Downloading VueTorrent UI..."
-    VUETRENT_URL=$(curl -sfL "https://api.github.com/repos/WDaan/VueTorrent/releases/latest" | grep -o '"browser_download_url": "[^"]*\.zip"' | grep -v 'legacy' | head -1 | cut -d'"' -f4)
-    if [ -n "$VUETRENT_URL" ]; then
-        TEMP_DIR=$(mktemp -d)
-        curl -sfL -o "$TEMP_DIR/vuetorrent.zip" "$VUETRENT_URL"
-        unzip -q "$TEMP_DIR/vuetorrent.zip" -d "$TEMP_DIR"
-        sudo rm -rf /var/opt/qbittorrent/vuetorrent/*
-        sudo cp -r "$TEMP_DIR/vuetorrent"/* /var/opt/qbittorrent/vuetorrent/
-        rm -rf "$TEMP_DIR"
-        sudo chown -R qbittorrent:qbittorrent /var/opt/qbittorrent/vuetorrent
-        echo "VueTorrent installed successfully."
-    else
-        echo "Warning: Could not download VueTorrent. Using default WebUI."
-    fi
-    echo "Adding qbittorrent to serverstorage group..."
-    sudo usermod -aG serverstorage qbittorrent
-    echo "Copying qBittorrent quadlet container file..."
+    echo "Initializing Flood-rtorrent user and directories..."
+    sudo mkdir -p /var/opt/flood-rtorrent/config
+    if ! getent group flood-rtorrent >/dev/null; then sudo groupadd --system --gid 1010 flood-rtorrent; fi
+    if ! getent passwd flood-rtorrent >/dev/null; then sudo useradd --system --gid flood-rtorrent --uid 1010 --no-create-home --shell /bin/false flood-rtorrent; fi
+    sudo chown -R flood-rtorrent:flood-rtorrent /var/opt/flood-rtorrent
+    echo "Adding flood-rtorrent to serverstorage group..."
+    sudo usermod -aG serverstorage flood-rtorrent
+    echo "Copying Flood-rtorrent quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
-    sudo cp "/usr/etc/bos/media_server_templates/qbittorrent.container" /etc/containers/systemd/
+    sudo cp "/usr/etc/bos/media_server_templates/flood-rtorrent.container" /etc/containers/systemd/
 
 [group('Setup')]
 setup-server-storage: _ensure-serverstorage-group
@@ -335,7 +320,7 @@ setup-media-services:
     ujust setup-gluetun
     ujust setup-samba
     ujust setup-audiobookshelf
-    ujust setup-qbittorrent
+    ujust setup-flood-rtorrent
     ujust setup-sonarr
     ujust setup-radarr
     ujust restart-media-services
@@ -357,7 +342,7 @@ setup-media-services-interactive:
         "setup-gluetun" \
         "setup-samba" \
         "setup-audiobookshelf" \
-        "setup-qbittorrent" \
+        "setup-flood-rtorrent" \
         "setup-sonarr" \
         "setup-radarr")
     for choice in $choices; do
@@ -374,7 +359,7 @@ restart-media-services:
     sudo systemctl daemon-reload
     # Stop VPN-dependent services first (so gluetun can restart)
     echo "Stopping VPN-dependent services..."
-    sudo systemctl stop qbittorrent.service || true
+    sudo systemctl stop flood-rtorrent.service || true
     sudo systemctl stop sonarr.service || true
     sudo systemctl stop radarr.service || true
     # Restart non-VPN services
@@ -391,11 +376,11 @@ restart-media-services:
     echo "Restarting gluetun VPN..."
     if sudo systemctl restart gluetun.service; then
         echo "Gluetun restarted successfully. Restarting VPN-dependent services..."
-        sudo systemctl restart qbittorrent.service || true
+        sudo systemctl restart flood-rtorrent.service || true
         sudo systemctl restart sonarr.service || true
         sudo systemctl restart radarr.service || true
     else
-        echo "ERROR: gluetun failed to restart. VPN-dependent services (qbittorrent, sonarr, radarr) are stopped."
+        echo "ERROR: gluetun failed to restart. VPN-dependent services (flood-rtorrent, sonarr, radarr) are stopped."
         exit 1
     fi
     echo "Media services restarted!"

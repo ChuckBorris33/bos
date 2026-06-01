@@ -1,22 +1,23 @@
 [Unit]
-Description=qBittorrent Daemon
+Description=Flood with rTorrent
 After=gluetun.service
 Wants=gluetun.service
 BindsTo=gluetun.service
 
 [Container]
-Image=lscr.io/linuxserver/qbittorrent:latest
+Image=ghcr.io/jesec/flood:latest
 AutoUpdate=registry
-ContainerName=qbittorrent
+ContainerName=flood-rtorrent
 Network=container:gluetun
+
+# Flood can manage rTorrent
+Exec=--rtorrent
 
 Environment=PUID=1010
 Environment=PGID=1003
-Environment=UMASK_SET=022
-Environment=WEBUI_PORT=8080
+Environment=FLOOD_OPTION_PORT=8080
 
-Volume=/var/opt/qbittorrent/config:/config:Z
-Volume=/var/opt/qbittorrent/vuetorrent:/vuetorrent:Z
+Volume=/var/opt/flood-rtorrent/config:/data:Z
 Volume=/var/server_storage/downloads:/downloads:z
 
 [Service]

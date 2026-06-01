@@ -33,7 +33,7 @@ home.ancon-mimosa.ts.net {
         reverse_proxy localhost:13378
     }
 
-    # qBittorrent
+    # Flood-rtorrent
     handle_path /torrents* {
         reverse_proxy localhost:8082
     }
@@ -43,54 +43,54 @@ home.ancon-mimosa.ts.net {
         reverse_proxy localhost:8989
     }
 
-    # Radarr
-    handle_path /radarr* {
-        reverse_proxy localhost:7878
+    # Flood-rtorrent
+    handle_path /torrents* {
+        reverse_proxy localhost:8082
     }
-}
+    }
 
-# --- HTTP redirects for old .home names ---
-http://media.home, http://www.media.home {
+    # --- HTTP redirects for old .home names ---
+    http://media.home, http://www.media.home {
     reverse_proxy localhost:8096
-}
+    }
 
-http://files.home, http://www.files.home {
+    http://files.home, http://www.files.home {
     reverse_proxy localhost:8088
-}
+    }
 
-http://downloads.home, http://www.downloads.home {
+    http://downloads.home, http://www.downloads.home {
     reverse_proxy localhost:8092
-}
+    }
 
-http://audiobooks.home, http://www.audiobooks.home {
+    http://audiobooks.home, http://www.audiobooks.home {
     reverse_proxy localhost:13378
-}
+    }
 
-http://torrents.home, http://www.torrents.home {
+    http://torrents.home, http://www.torrents.home {
     reverse_proxy localhost:8082
-}
+    }
 
-http://sonarr.home, http://www.sonarr.home {
+    http://sonarr.home, http://www.sonarr.home {
     reverse_proxy localhost:8989
-}
+    }
 
-http://radarr.home, http://www.radarr.home {
+    http://radarr.home, http://www.radarr.home {
     reverse_proxy localhost:7878
-}
+    }
 
-http://dash.home, http://www.dash.home {
+    http://dash.home, http://www.dash.home {
     reverse_proxy localhost:8090
-}
+    }
 
-http://yt-down.home, http://www.yt-down.home {
+    http://yt-down.home, http://www.yt-down.home {
     reverse_proxy localhost:8081
-}
+    }
 
-http://home.home, http://www.home.home {
+    http://home.home, http://www.home.home {
     root * /srv/www/dashboard
     file_server
-}
-"
+    }
+    "
 
-export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home sonarr.home radarr.home"
-export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,qbittorrent*,sonarr*,radarr*"
+    export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home sonarr.home radarr.home"
+    export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,flood-rtorrent*,sonarr*,radarr*"
