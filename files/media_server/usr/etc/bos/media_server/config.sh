@@ -38,9 +38,9 @@ home.ancon-mimosa.ts.net {
         reverse_proxy localhost:8082
     }
 
-    # Sonarr
-    handle_path /sonarr* {
-        reverse_proxy localhost:8989
+    # LibreChat
+    handle_path /chat* {
+        reverse_proxy localhost:3080
     }
 
     # Flood-rtorrent
@@ -70,12 +70,8 @@ home.ancon-mimosa.ts.net {
     reverse_proxy localhost:8082
     }
 
-    http://sonarr.home, http://www.sonarr.home {
-    reverse_proxy localhost:8989
-    }
-
-    http://radarr.home, http://www.radarr.home {
-    reverse_proxy localhost:7878
+    http://chat.home, http://www.chat.home {
+    reverse_proxy localhost:3080
     }
 
     http://dash.home, http://www.dash.home {
@@ -92,5 +88,5 @@ home.ancon-mimosa.ts.net {
     }
     "
 
-    export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home sonarr.home radarr.home"
-    export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,flood-rtorrent*,sonarr*,radarr*"
+    export DNSMASQ_DOMAINS="media.home files.home dash.home yt-down.home home.home downloads.home audiobooks.home torrents.home chat.home"
+    export SERVICE_PATTERNS="beszel*,dnsmasq*,filebrowser*,jellyfin*,metube*,caddy*,samba*,tailscale*,firewall*,sshd*,fsqd*,audiobookshelf*,gluetun*,flood-rtorrent*,librechat*"

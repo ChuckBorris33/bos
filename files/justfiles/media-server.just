@@ -208,34 +208,17 @@ setup-audiobookshelf: _ensure-serverstorage-group
     sudo cp "/usr/etc/bos/media_server_templates/audiobookshelf.container" /etc/containers/systemd/
 
 [group('Setup')]
-setup-sonarr: _ensure-serverstorage-group
+setup-librechat: _ensure-serverstorage-group
     #!/usr/bin/env bash
     set -euxo pipefail
-    echo "Initializing Sonarr user and directories..."
-    sudo mkdir -p /var/opt/sonarr/config
-    if ! getent group sonarr >/dev/null; then sudo groupadd --system --gid 1011 sonarr; fi
-    if ! getent passwd sonarr >/dev/null; then sudo useradd --system --gid sonarr --uid 1011 --no-create-home --shell /bin/false sonarr; fi
-    sudo chown -R sonarr:sonarr /var/opt/sonarr
-    echo "Adding sonarr to serverstorage group..."
-    sudo usermod -aG serverstorage sonarr
-    echo "Copying Sonarr quadlet container file..."
+    echo "Initializing LibreChat user and directories..."
+    sudo mkdir -p /var/opt/librechat/config /var/opt/librechat/uploads
+    if ! getent group librechat >/dev/null; then sudo groupadd --system --gid 1013 librechat; fi
+    if ! getent passwd librechat >/dev/null; then sudo useradd --system --gid librechat --uid 1013 --no-create-home --shell /bin/false librechat; fi
+    sudo chown -R librechat:librechat /var/opt/librechat
+    echo "Copying LibreChat quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
-    sudo cp "/usr/etc/bos/media_server_templates/sonarr.container" /etc/containers/systemd/
-
-[group('Setup')]
-setup-radarr: _ensure-serverstorage-group
-    #!/usr/bin/env bash
-    set -euxo pipefail
-    echo "Initializing Radarr user and directories..."
-    sudo mkdir -p /var/opt/radarr/config
-    if ! getent group radarr >/dev/null; then sudo groupadd --system --gid 1012 radarr; fi
-    if ! getent passwd radarr >/dev/null; then sudo useradd --system --gid radarr --uid 1012 --no-create-home --shell /bin/false radarr; fi
-    sudo chown -R radarr:radarr /var/opt/radarr
-    echo "Adding radarr to serverstorage group..."
-    sudo usermod -aG serverstorage radarr
-    echo "Copying Radarr quadlet container file..."
-    sudo mkdir -p /etc/containers/systemd
-    sudo cp "/usr/etc/bos/media_server_templates/radarr.container" /etc/containers/systemd/
+    sudo cp "/usr/etc/bos/media_server_templates/librechat.container" /etc/containers/systemd/
 
 [group('Setup')]
 setup-gluetun:
@@ -294,6 +277,8 @@ setup-flood-rtorrent: _ensure-serverstorage-group
     sudo chown -R flood-rtorrent:flood-rtorrent /var/opt/flood-rtorrent
     echo "Adding flood-rtorrent to serverstorage group..."
     sudo usermod -aG serverstorage flood-rtorrent
+    echo \"Cleaning up stale rTorrent locks...\"
+    sudo rm -f /var/opt/flood-rtorrent/config/.local/share/rtorrent/.session/rtorrent.lock
     echo "Copying Flood-rtorrent quadlet container file..."
     sudo mkdir -p /etc/containers/systemd
     sudo cp "/usr/etc/bos/media_server_templates/flood-rtorrent.container" /etc/containers/systemd/
@@ -335,8 +320,7 @@ setup-media-services:
     ujust setup-samba
     ujust setup-audiobookshelf
     ujust setup-flood-rtorrent
-    ujust setup-sonarr
-    ujust setup-radarr
+    ujust setup-librechat
     ujust restart-media-services
     echo "Media services setup complete!"
 
@@ -357,8 +341,7 @@ setup-media-services-interactive:
         "setup-samba" \
         "setup-audiobookshelf" \
         "setup-flood-rtorrent" \
-        "setup-sonarr" \
-        "setup-radarr")
+        "setup-librechat")
     for choice in $choices; do
         ujust $choice
     done
@@ -374,8 +357,6 @@ restart-media-services:
     # Stop VPN-dependent services first (so gluetun can restart)
     echo "Stopping VPN-dependent services..."
     sudo systemctl stop flood-rtorrent.service || true
-    sudo systemctl stop sonarr.service || true
-    sudo systemctl stop radarr.service || true
     # Restart non-VPN services
     sudo systemctl restart dnsmasq.service || true
     sudo systemctl restart caddy.service || true
@@ -386,15 +367,14 @@ restart-media-services:
     sudo systemctl restart samba.service || true
     sudo systemctl restart fsqd.service || true
     sudo systemctl restart audiobookshelf.service || true
+    sudo systemctl restart librechat.service || true
     # Restart gluetun
     echo "Restarting gluetun VPN..."
     if sudo systemctl restart gluetun.service; then
         echo "Gluetun restarted successfully. Restarting VPN-dependent services..."
         sudo systemctl restart flood-rtorrent.service || true
-        sudo systemctl restart sonarr.service || true
-        sudo systemctl restart radarr.service || true
     else
-        echo "ERROR: gluetun failed to restart. VPN-dependent services (flood-rtorrent, sonarr, radarr) are stopped."
+        echo "ERROR: gluetun failed to restart. VPN-dependent service (flood-rtorrent) is stopped."
         exit 1
     fi
     echo "Media services restarted!"

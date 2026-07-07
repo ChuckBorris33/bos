@@ -5,17 +5,18 @@ Wants=gluetun.service
 BindsTo=gluetun.service
 
 [Container]
-Image=ghcr.io/jesec/flood:latest
+Image=docker.io/jesec/rtorrent-flood:latest
 AutoUpdate=registry
 ContainerName=flood-rtorrent
+HostName=flood-rtorrent
 Network=container:gluetun
+User=1010:1003
 
-# Flood can manage rTorrent
-Exec=--rtorrent
+# Managed rTorrent is handled by the image.
+# We set the port and allowed path.
+Exec=--rtorrent --port 8080 --allowed-path /downloads
 
-Environment=PUID=1010
-Environment=PGID=1003
-Environment=FLOOD_OPTION_PORT=8080
+Environment=HOME=/data
 
 Volume=/var/opt/flood-rtorrent/config:/data:Z
 Volume=/var/server_storage/downloads:/downloads:z
