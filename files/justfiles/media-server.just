@@ -379,91 +379,6 @@ restart-media-services:
     fi
     echo "Media services restarted!"
 
-[group('Setup')]
-setup-esde-kiosk:
-    #!/usr/bin/env bash
-    set -euxo pipefail
-    TPL_DIR="/usr/etc/bos/media_server_templates"
-    KIOSK_USER="steam"
-    # Create steam user first (before using their home directory)
-    if ! id "$KIOSK_USER" &>/dev/null; then
-        echo "Creating user '$KIOSK_USER'..."
-        sudo useradd -m "$KIOSK_USER"
-        echo "Setting empty password for '$KIOSK_USER'..."
-        sudo passwd -d "$KIOSK_USER"
-    else
-        echo "User '$KIOSK_USER' already exists. Skipping creation."
-    fi
-    # Get actual home directory (handles /home vs /var/home)
-    STEAM_HOME=$(getent passwd "$KIOSK_USER" | cut -d: -f6)
-    echo "Steam home directory: $STEAM_HOME"
-    # Ensure home directory exists and is owned by steam user
-    if [ ! -d "$STEAM_HOME" ]; then
-        echo "Creating home directory $STEAM_HOME..."
-        sudo mkdir -p "$STEAM_HOME"
-        sudo chown "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME"
-    fi
-    # Add steam user to serverstorage group for media access
-    echo "Adding $KIOSK_USER to serverstorage group..."
-    sudo usermod -aG serverstorage "$KIOSK_USER"
-    # Check that ES-DE is installed (expected to be installed from terra repo)
-    echo "Checking ES-DE installation..."
-    if ! command -v es-de &>/dev/null; then
-        echo "WARNING: ES-DE (es-de command) not found in PATH."
-        echo "Please ensure ES-DE is installed from the terra repository."
-        echo "Install with: sudo dnf install es-de"
-        exit 1
-    fi
-    echo "ES-DE found: $(which es-de)"
-        # Setup Sway configuration
-        echo "Setting up Sway configuration for Kiosk mode..."
-        SWAY_CONFIG_DIR="$STEAM_HOME/.config/sway/config.d"
-        sudo mkdir -p "$SWAY_CONFIG_DIR"
-        sudo cp "${TPL_DIR}/sway_config" "$SWAY_CONFIG_DIR/99-custom-config.conf"
-        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.config"
-        # Copy ES-DE settings from template
-        echo "Copying ES-DE settings..."
-        sudo mkdir -p "$STEAM_HOME/ES-DE/settings"
-        sudo cp "${TPL_DIR}/es_settings.xml" "$STEAM_HOME/ES-DE/settings/"
-        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/ES-DE"
-        KIOSK_SCRIPT="$STEAM_HOME/start_esde_kiosk.sh"
-        # Always copy the launch script to ensure the latest version is used
-        echo "Setting up ES-DE launch script..."
-        sudo cp "${TPL_DIR}/start_esde_kiosk.sh" "$KIOSK_SCRIPT"
-        sudo chmod +x "$KIOSK_SCRIPT"
-        sudo chown "$KIOSK_USER:$KIOSK_USER" "$KIOSK_SCRIPT"
-        # Install desktop file for manual launch
-        echo "Installing ES-DE desktop entry..."
-        sudo mkdir -p "$STEAM_HOME/.local/share/applications"
-        sudo cp "${TPL_DIR}/esde-gamescope.desktop" "$STEAM_HOME/.local/share/applications/"
-        sudo chown -R "$KIOSK_USER:$KIOSK_USER" "$STEAM_HOME/.local"
-        echo "Configuring display manager (SDDM) for autologin..."
-        sudo mkdir -p "/etc/sddm.conf.d/"
-        AUTOLOGIN_CONF="/etc/sddm.conf.d/autologin.conf"
-        echo "[Autologin]" | sudo tee "$AUTOLOGIN_CONF" > /dev/null
-        echo "User=$KIOSK_USER" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-        echo "Session=sway" | sudo tee -a "$AUTOLOGIN_CONF" > /dev/null
-        # Update RetroArch config to enable core updater in menu
-        echo "Configuring RetroArch to show core updater..."
-        RETROARCH_CONFIG="$STEAM_HOME/.config/retroarch/retroarch.cfg"
-        if [ -f "$RETROARCH_CONFIG" ]; then
-            if grep -q "menu_show_core_updater" "$RETROARCH_CONFIG"; then
-                sudo sed -i 's/menu_show_core_updater = ".*"/menu_show_core_updater = "true"/' "$RETROARCH_CONFIG"
-            else
-                echo 'menu_show_core_updater = "true"' | sudo tee -a "$RETROARCH_CONFIG" > /dev/null
-            fi
-            if grep -q "menu_show_online_updater" "$RETROARCH_CONFIG"; then
-                sudo sed -i 's/menu_show_online_updater = ".*"/menu_show_online_updater = "true"/' "$RETROARCH_CONFIG"
-            else
-                echo 'menu_show_online_updater = "true"' | sudo tee -a "$RETROARCH_CONFIG" > /dev/null
-            fi
-            sudo chown "$KIOSK_USER:$KIOSK_USER" "$RETROARCH_CONFIG"
-        else
-            echo "WARNING: RetroArch config not found at $RETROARCH_CONFIG"
-            echo "Please ensure RetroArch is installed."
-        fi
-        echo "ES-DE Kiosk setup complete!"
-
 setup-all:
     @ujust install-default-brew
     @ujust install-default-flatpaks
@@ -485,8 +400,7 @@ setup-interactive:
         "configure-git-identity" \
         "set-default-shell" \
         "setup-tailscale" \
-        "setup-media-services-interactive" \
-        "setup-esde-kiosk")
+        "setup-media-services-interactive")
     for choice in $choices; do
         ujust $choice
     done

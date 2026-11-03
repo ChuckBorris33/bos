@@ -3,10 +3,10 @@
 # image will be published to ghcr.io/<user>/<name>
 name: bosm
 # description will be included in the image's metadata
-description: This is my personal OS image for home lab/media center.
+description: This is my personal OS image for headless home lab/media server.
 
 # the base image to build on top of (FROM) and the version tag to use
-base-image: quay.io/fedora-ostree-desktops/sway-atomic
+base-image: quay.io/fedora-ostree-desktops/base-atomic
 image-version: 43 # latest is also supported if you want new updates ASAP
 
 # module configuration, executed in order

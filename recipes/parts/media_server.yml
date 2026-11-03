@@ -12,6 +12,7 @@ modules:
       enabled:
         - podman-auto-update.service
         - podman-auto-update.timer
+        - sshd.service
   - type: justfiles
     include:
       - apps.just
@@ -19,17 +20,6 @@ modules:
       - system.just
       - media-server.just
     validate: true
-  - type: dnf
-    repos:
-      cleanup: true
-      files:
-        - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
-    install:
-      packages:
-        - evtest
-        - joystick
-        - es-de
-        - retroarch
   - type: brewfiles
     source: local
     include:
@@ -41,6 +31,3 @@ modules:
         repo:
           title: Flathub (user)
         install: []
-  - type: script
-    scripts:
-      - "install_steam.sh"
